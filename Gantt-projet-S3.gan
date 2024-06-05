@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Gantt projet S3" company="" webLink="http://" view-date="2024-05-26" view-index="0" gantt-divider-location="351" resource-divider-location="300" version="3.3.3309" locale="fr_CA">
+    <description/>
+    <view zooming-state="default:7" id="gantt-chart">
+        <field id="tpd3" name="Name" width="200" order="0"/>
+        <field id="tpd4" name="Begin date" width="75" order="1"/>
+        <field id="tpd5" name="End date" width="75" order="2"/>
+        <field id="tpd15" name="Notes" width="20" order="3"/>
+        <option id="filter.completedTasks" value="false"/>
+        <option id="filter.dueTodayTasks" value="false"/>
+        <option id="filter.overdueTasks" value="false"/>
+        <option id="filter.inProgressTodayTasks" value="false"/>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Name" width="210" order="0"/>
+        <field id="1" name="Default role" width="86" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+            <only-show-weekends value="false"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="0" uid="512a0563367c4e52b503d5a89be0db88" name="Motion genesis" meeting="false" start="2024-05-30" duration="10" complete="0" priority="2" expand="true"/>
+        <task id="8" uid="d7436e6ec4ad4c85bdac65a400f3cc6e" name="Simulink" meeting="false" start="2024-06-06" duration="11" complete="0" expand="true"/>
+        <task id="1" uid="3d2a5f96990e41798b580d4b0f769f95" name="Concept préliminaire" meeting="false" start="2024-05-30" duration="6" complete="0" expand="true">
+            <depend id="2" type="2" difference="0" hardness="Strong"/>
+            <depend id="4" type="2" difference="0" hardness="Strong"/>
+            <depend id="5" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="2" uid="b9a419692058494193efe1e28ab40d58" name="Concept final" meeting="false" start="2024-06-07" duration="6" complete="0" priority="2" expand="true"/>
+        <task id="4" uid="3701949b395e4b4bb988387c02ce16dc" name="Châssis" meeting="false" start="2024-06-07" duration="6" complete="0" expand="true">
+            <depend id="6" type="2" difference="0" hardness="Strong"/>
+            <depend id="11" type="2" difference="0" hardness="Strong"/>
+            <depend id="13" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="13" uid="6e049375e5e44fa6bfd36a4b6ce9d644" name="Installation électronique" meeting="false" start="2024-06-17" duration="6" complete="0" expand="true"/>
+        <task id="5" uid="e061d74653aa4ff79db5fb57d3136144" name="Roues" meeting="false" start="2024-06-07" duration="6" complete="0" expand="true">
+            <depend id="11" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="6" uid="afc5ca2c0af0455e8fdc37335e485c85" name="Pendule et préhenseur" meeting="false" start="2024-06-17" duration="6" complete="0" expand="true">
+            <depend id="11" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="11" uid="4fa0baac996a493ba4b2d10dfa447827" name="Assemblage" meeting="false" start="2024-06-25" duration="8" complete="0" expand="true">
+            <depend id="12" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="12" uid="01e957cb41934854b106b0d5942f3923" name="Tests assemblage" meeting="false" start="2024-07-05" duration="12" complete="0" expand="true"/>
+        <task id="3" uid="b219add0d6d44a7bad195bc9a1879e22" name="Construction" meeting="false" start="2024-06-06" duration="11" complete="0" expand="true"/>
+        <task id="9" uid="5a88d7f4f67041e9be8cd97cd0565741" name="Programmation" meeting="false" start="2024-06-13" duration="21" complete="0" expand="true"/>
+        <task id="14" uid="422a42a58de94fb6bc336ccc56efbdd2" name="Tests programmation" meeting="false" start="2024-07-12" duration="15" complete="0" expand="true"/>
+    </tasks>
+    <resources/>
+    <allocations/>
+    <vacations/>
+    <previous/>
+    <roles roleset-name="Default"/>
+</project>
