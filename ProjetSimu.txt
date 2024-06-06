@@ -1,0 +1,31 @@
+NewtonianFrame N
+
+RigidFrame P
+RigidBody Robot
+
+Particle Prehenseur
+Particle MoteurArriere
+Particle MoteurAvant
+
+System Robus (MoteurArriere, MoteurAvant, Robot)
+
+Constant MR
+Constant MARR
+Constant MAV
+Constant MP
+Constant L
+Constant h0
+Constant m
+constant g = 9.81
+
+Variable q''
+
+P.RotateZ(N,q)
+
+
+Robot.SetMass(MR)
+MoteurArriere.SetMass(MARR)
+MoteurAvant.SetMass(MAV)
+
+%Translate
+
