@@ -1,0 +1,66 @@
+NewtonianFrame N
+
+RigidBody R %Robot
+RigidBody P %Prehenseur
+RigidBody RW %Roue Arriere
+RigidBody FW %Roue Avant
+
+Particle B %Batterie
+Particle M %Moteur
+Particle S  %Sapin
+
+
+System Robus (R,B,M,RW,FW)
+System Bras (P,S)
+
+
+Constant MasseRobot
+Constant MasseBatterie
+Constant MasseMoteur
+Constant MassePrehenseur
+Constant MasseSapin
+Constant MasseRW
+Constant MasseFW
+Constant LongueurPendule
+Constant HauteurSapin
+Constant g
+Constant ho
+Constant torque
+Constant VitAngulaire
+
+Constant distRWM %distance entre le RW et le milieu du robot
+Constant distSolRail %distance entre le sol et le rail
+Constant distRailM %distance entre le rail et le milieu du robot
+Constant diametreRoue %diametre des roues
+Constant distBatMilieu %distance entre la batterie et le milieu du robot
+Constant distMotMilieu %distance entre le moteur et le milieu du robot
+
+Variable q'',fg,fd,FRpendX,FRpendY,tension,X'',
+
+R.SetMass(MasseRobot)
+P.SetMass(MassePrehenseur)
+B.SetMass(MasseBatterie)
+M.SetMass(MasseMoteur)
+S.SetMass(MasseSapin)
+RW.SetMass(MasseRW)
+FW.SetMass(MasseFW)
+RW.SetInertia(Rwo,0,0,InertieRW)
+FW.SetInertia(Fwo,0,0,InertieFW)
+
+R.SetAngularVelocityAcceleration(N,0>)
+P.RotateZ(N,q)
+
+Ro.Translate(NoX*nx>)
+RWo.Translate(Ro,-distRWM*rx>)
+FWo.Translate(Ro,distRWM*rx>)
+Po.Translate(Ro,-LongueurPendule*py>)
+S.Translate(Po,-HauteurSapin*py>)
+B.Translate(Ro,distBatMilieu*rx>)
+M.Translate(Ro,-distMotMilieu*rx>)
+
+
+
+
+
+
+

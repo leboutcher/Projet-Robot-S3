@@ -1,31 +1,29 @@
 NewtonianFrame N
  
-RigidBody P
-RigidBody R
-RigidBody Roue1
-RigidBody Roue2
+RigidBody P % Préhenseur
+RigidBody R % Robot 
  
-Particle Prehenseur
-Particle Moteur
-Particle batt
-Particle sapin
+Particle Prehenseur % Préhenseur
+Particle Moteur % Moteur
+Particle batt % Batterie
+Particle sapin % Sapin
  
-point mo (N)
+Point mo (N) 
 Point FW (R)
 Point BW (R)
  
 % system
 System Robus (Moteur, batt, R)
-System bras (Prehenseur, P)
+%System bras (Prehenseur, P)
 System sapin (Prehenseur, P, sapin)
  
 %constant
-Constant Mrobot
-Constant Mmoteur
-Constant Mbatt
-Constant MPrehenseur
-Constant Mpendule
-Constant Msapin
+Constant Mrobot %masse du robot
+Constant Mmoteur %masse du moteur
+Constant Mbatt %masse de la batterie
+Constant MPrehenseur %masse du préhensuer
+Constant Mpendule %masse du pendule
+Constant Msapin %Masse du sapin
 Constant L %dist cdm et préhensuer
 Constant h0 % hauteur obstacle
 Constant hr % hauteur rail par rapport au sol
