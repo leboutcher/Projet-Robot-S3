@@ -10,8 +10,8 @@ Particle M %Moteur
 Particle S  %Sapin
 
 
-System Robus (R,B,M,RW,FW)
-System Bras (P,S)
+System S1(R,B,M,RW,FW)
+System S2(P,S)
 
 
 Constant MasseRobot
@@ -34,29 +34,83 @@ Constant distRailM %distance entre le rail et le milieu du robot
 Constant diametreRoue %diametre des roues
 Constant distBatMilieu %distance entre la batterie et le milieu du robot
 Constant distMotMilieu %distance entre le moteur et le milieu du robot
+Constant longrobot %longueur du robot
 
-Variable q'',fg,fd,FRpendX,FRpendY,tension,X'',
+Variable q'',fg,fd,FRpendX,FRpendY,tension,X''
 
-R.SetMass(MasseRobot)
-P.SetMass(MassePrehenseur)
-B.SetMass(MasseBatterie)
-M.SetMass(MasseMoteur)
-S.SetMass(MasseSapin)
-RW.SetMass(MasseRW)
-FW.SetMass(MasseFW)
-RW.SetInertia(Rwo,0,0,InertieRW)
-FW.SetInertia(Fwo,0,0,InertieFW)
+R.SetMass(MasseRobot) %Ajout de la masse du robot
+P.SetMass(MassePrehenseur) %Ajout de la masse du prehenseur
+B.SetMass(MasseBatterie) %Ajout de la masse de la batterie
+M.SetMass(MasseMoteur) %Ajout de la masse du moteur
+S.SetMass(MasseSapin) %Ajout de la masse du sapin
+RW.SetMass(MasseRW) %Ajout de la masse de la roue arriere
+FW.SetMass(MasseFW) %Ajout de la masse de la roue avant
+RW.SetInertia(RWcm,0,0,InertieRW) %Ajout de l'inertie de la roue arriere
+FW.SetInertia(FWcm,0,0,InertieFW) %Ajout de l'inertie de la roue avant
+P.SetInertia(Pcm,0,0,InertieP) %Ajout de l'inertie du prehenseur sinon ca ne voualit pas compiler
+RW.SetAngularVelocity(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue arriere
+FW.SetAngularVelocity(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue avant
 
+R.RotateZ(N,0)
 R.SetAngularVelocityAcceleration(N,0>)
+RW.RotateZ(N,0)
+RW.SetAngularVelocityAcceleration(N,0>)
+FW.RotateZ(N,0)
+FW.SetAngularVelocityAcceleration(N,0>)
+
 P.RotateZ(N,q)
 
-Ro.Translate(NoX*nx>)
-RWo.Translate(Ro,-distRWM*rx>)
-FWo.Translate(Ro,distRWM*rx>)
-Po.Translate(Ro,-LongueurPendule*py>)
-S.Translate(Po,-HauteurSapin*py>)
-B.Translate(Ro,distBatMilieu*rx>)
-M.Translate(Ro,-distMotMilieu*rx>)
+Ro.Translate(No,X*nx>)
+
+Rcm.Translate(Ro,longrobot/2*rx>)
+
+RWcm.Translate(Rcm,-distRWM*rx>)
+
+Rwo.Translate(RWcm,-diametreRoue/2*ry>)
+
+FWcm.Translate(Rcm,distRWM*rx>)
+
+Fwo.Translate(FWcm,-diametreRoue/2*ry>)
+
+Pcm.Translate(Rcm,-LongueurPendule*py>)
+
+S.Translate(Pcm,-HauteurSapin/2*py>)
+
+B.Translate(Rcm,distBatMilieu*rx>)
+
+M.Translate(Rcm,-distMotMilieu*rx>)
+
+
+VT> = Ro.Getunitvector(Pcm)
+
+%AddForces
+Rcm.AddForce(tension*VT>)
+Rcm.Addforce(FRpendX*nx>+FRpendY*ry>)
+Rcm.AddForce(-MasseRobot*g*ny>)
+Pcm.AddForce(-tension*VT>)
+Pcm.AddForce(FRpendX*nx>+FRpendY*ny>)
+Pcm.AddForce(-MassePrehenseur*g*ny>)
+RWcm.AddForce(-MasseRW*g*ny>)
+FWcm.AddForce(-MasseFW*g*ny>)
+S.AddForce(-MasseSapin*g*ny>)
+B.AddForce(-MasseBatterie*g*ny>)
+M.AddForce(-MasseMoteur*g*ny>)
+
+%AddTorques
+RW.AddTorque(torque*nz>)
+%Équations
+eq[1] = dot(S1.Getdynamics(),nx>)
+eq[2] = dot(S1.Getdynamics(),ny>)
+eq[3] = dot(S1.Getdynamics(Rcm),nz>)
+eq[4] = dot(S2.Getdynamics(),nx>)
+eq[5] = dot(S2.Getdynamics(),ny>)
+eq[6] = dot(S2.Getdynamics(Pcm),nz>)
+eq[7] = abs(Rcm.GetDistance(Pcm))-LongueurPendule
+
+
+
+
+
 
 
 
