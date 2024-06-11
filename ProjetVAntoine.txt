@@ -85,10 +85,10 @@ VT> = Ro.Getunitvector(Pcm)
 
 %AddForces
 Rcm.AddForce(tension*VT>)
-Rcm.Addforce(FRpendX*nx>+FRpendY*ry>)
+Rcm.Addforce(FRpendX*rx>+FRpendY*ry>)
 Rcm.AddForce(-MasseRobot*g*ny>)
 Pcm.AddForce(-tension*VT>)
-Pcm.AddForce(FRpendX*nx>+FRpendY*ny>)
+Pcm.AddForce(FRpendX*px>+FRpendY*py>)
 Pcm.AddForce(-MassePrehenseur*g*ny>)
 RWcm.AddForce(-MasseRW*g*ny>)
 FWcm.AddForce(-MasseFW*g*ny>)
