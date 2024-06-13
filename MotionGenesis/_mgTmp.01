@@ -1,21 +1,15 @@
 NewtonianFrame N
-
 RigidBody R %Robot
 RigidBody P %Prehenseur
 RigidBody RW %Roue Arriere
 RigidBody FW %Roue Avant
 %RigidBody E %Pendule
-
 Particle B %Batterie
 Particle M %Moteur
 Particle S  %Sapin
 %Point EP (E)
-
-
 System S1(R,B,M,RW,FW)
 System S2(P,S) 
-
-
 Constant MasseRobot
 Constant MasseBatterie
 Constant MasseMoteur
@@ -30,7 +24,6 @@ Constant g
 Constant ho
 Constant torque
 Constant VitAngulaire
-
 Constant distRWM %distance entre le RW et le milieu du robot
 Constant distSolRail %distance entre le sol et le rail
 Constant distRailM %distance entre le rail et le milieu du robot
@@ -41,9 +34,7 @@ Constant longrobot %longueur du robot
 Constant InertieRW = (0.5 * MasseRW * diametreRoue^2) %inertie de la roue arriere
 Constant InertieFW = (0.5 * MasseFW * diametreRoue^2) %inertie de la roue avant
 Constant InertieP = (0.5 * MassePrehenseur * diametreRoue^2) %inertie du prehenseur
-
 Variable q'',fg,fd,Nd,Ng,tension,X''
-
 R.SetMass(MasseRobot) %Ajout de la masse du robot
 P.SetMass(MassePrehenseur) %Ajout de la masse du prehenseur
 B.SetMass(MasseBatterie) %Ajout de la masse de la batterie
@@ -57,43 +48,25 @@ FW.SetInertia(FWcm,0,0,InertieFW) %Ajout de l'inertie de la roue avant
 P.SetInertia(Pcm,0,0,InertieP) %Ajout de l'inertie du prehenseur sinon ca ne voualit pas compiler
 RW.SetAngularVelocity(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue arriere
 FW.SetAngularVelocity(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue avant
-
 R.RotateZ(N,0)
 R.SetAngularVelocityAcceleration(N,0>)
-FW.RotateZ(N,theta)
-RW.RotateZ(N,theta)
-
+FW.RotateZ(N,0)
+RW.RotateZ(N,0)
 P.RotateZ(N,q)
-
 Ro.Translate(No,X*nx>)
-
 %Eo.Translate(Rcm, 0>)
-
 %Ecm.Translate(Eo,-LongueurPendule*ey>)
-
 %EP.Translate (Pcm,0>)
-
 Rcm.Translate(Ro,longrobot/2*rx>)
-
 RWcm.Translate(Rcm,-distRWM*rx>)
-
 Rwo.Translate(RWcm,-diametreRoue/2*ry>)
-
 FWcm.Translate(Rcm,distRWM*rx>)
-
 Fwo.Translate(FWcm,-diametreRoue/2*ry>)
-
 Pcm.Translate(Rcm,-LongueurPendule*py>)
-
 S.Translate(Pcm,-HauteurSapin/2*py>)
-
 B.Translate(Rcm,distBatMilieu*rx>)
-
 M.Translate(Rcm,-distMotMilieu*rx>)
-
-
 VT> = Rcm.Getunitvector(Pcm)
-
 %AddForces
 Rcm.AddForce(tension*VT>)
 Rcm.AddForce(-MasseRobot*g*ny>)
@@ -111,7 +84,6 @@ M.AddForce(-MasseMoteur*g*ny>)
 %Ecm.AddForce(-MassePendule*g*ny>)
 %Eo.AddForce(-tension*VT>)
 %EP.AddForce(tension*VT>)
-
 %AddTorques
 RW.AddTorque(torque*nz>)
 %Équations
@@ -122,48 +94,3 @@ eq[4] = dot(S2.Getdynamics(),nx>)
 eq[5] = dot(S2.Getdynamics(),ny>)
 eq[6] = dot(S2.Getdynamics(Pcm),nz>)
 eq[7] = EP.GetDistance(Rcm) - LongueurPendule
-
-%tspan
-Input tStep = 0.01, tFinal = 10 sec
-
-%Conditions initiales<
-Input q = 0 deg , fg=0 N, fd = 0 N, Nd = 10 N, Ng = 10 N, tension = 10 N, X = 0 m 
-
-%Constantes
-Input MasseRobot = 2 kg
-Input MasseBatterie = 0.5 kg
-Input MasseMoteur = 0.5 kg
-Input MassePrehenseur = 0.5 kg
-Input MasseSapin = 0.5 kg
-Input MasseRW = 0.0018 kg
-Input MasseFW = 0.0018 kg
-Input LongueurPendule = 0.5 m
-Input HauteurSapin = 0.2 m
-Input g = 9.81 m/s^2
-Input ho = 0.5 m
-Input torque = 0.1 N*m
-Input VitAngulaire = 10 rad/s
-Input distRWM = 0.1 m
-Input distSolRail = 0.1 m
-Input distRailM = 0.1 m
-Input diametreRoue = 0.08 m
-Input distBatMilieu = 0.1 m
-Input distMotMilieu = 0.1 m
-Input longrobot = 0.5 m
-
-ODE (eq,q'',fg,fd,Nd,Ng,tension,X'')
-Plot ODE.1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
