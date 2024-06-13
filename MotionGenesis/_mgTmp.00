@@ -1,27 +1,21 @@
 NewtonianFrame N
- 
 RigidBody P % Préhenseur
 RigidBody R % Robot 
 RigidBody rF % roue et axe
 RigidBody rB % roue et axe
-
 Particle Prehenseur % Préhenseur
 Particle Moteur % Moteur
 Particle batt % Batterie
 Particle sapin % Sapin
-
- 
 Point mo (N) 
 Point FW (R)
 Point BW (R)
 Point CRF (rF) % point de contacte entre la roue1 et le rail
 Point CRB (rB) % point de contacte entre la roue2 et le rail
-
 % system
 System Robus (Moteur, batt, R)
 %System bras (Prehenseur, P)
 System sapin (Prehenseur, P, sapin)
- 
 %constant
 Constant Mrobot %masse du robot
 Constant Mmoteur %masse du moteur
@@ -38,26 +32,20 @@ Constant hRobot % hauteur robot par raport au rail
 constant g = 9.81 m/s^2
 constant distmO % distance de la masse a l'ocbstacle
 constant distOB % distance de l'obstacle au bac
- 
 constant distRcm_Moteur %distance du centre de masse de R du moteur
 constant distRcm_batt %distance du centre de masse de R de la batt
 constant distRcm_BW %distance du centre de masse de R de la rout arrière
 constant distRcm_FW %distance du centre de masse de R de la rout avant
- 
 Constant Torque
- 
 hrobot_sol = hr + hRobot %hauteur robot par rapport au sol
- 
 % variable
 Variable q'', X''
 Variable Frx_p, Fry_p, Frx_rF, Fry_rF, Frx_rB, Fry_rB, fg, fd
 Variable hp % hauteur préhensuer
 Variable hps % hauteur préhensuer + sapin
- 
 % matrix de rotation
 R.RotateZ(N,0)
 P.RotateZ(R,q)
- 
 % set Mass
 R.SetMass(Mrobot)
 Moteur.SetMass(Mmoteur*2)
@@ -65,10 +53,8 @@ Prehenseur.SetMass(Mprehenseur)
 P.SetMass(Mpendule)
 batt.SetMass(Mbatt)
 sapin.SetMass(Msapin)
- 
 %Translate
 mo.Translate(No,0>)
-
 %robot
 Rcm.Translate(mo, hrobot_sol*ny> + X*nx>)
 Ro.Translate(Rcm, 0>)
@@ -76,50 +62,13 @@ Moteur.Translate(Rcm, distRcm_Moteur*nx>)
 batt.Translate(Rcm, distRcm_batt*nx>)
 BW.Translate(Rcm, -distRcm_BW*Rx>)
 FW.Translate(Rcm, distRcm_FW*Rx>)
-
 % pendule et préensaeur 
 Po.Translate(Ro, 0>)
 Pcm.Translate(Po, (L/2)*py>)
 Prehenseur.Translate(Po, L*py>)
-
 %position de roue 
 rFcm.Translate(FW, 0>)
 rBcm.Translate(BW, 0>)
-
 % point de contacte roue rail
 CRF.Translate(rFcm, r*ny>)
-CRB.Translate(rBcm, r*ny>)
-
- 
-%force
-%force de gravité
-Rcm.AddForce((-Mrobot*g)*ny>)
-Prehenseur.AddForce((-MPrehenseur*g)*ny>)
-Moteur.AddForce((-Mmoteur*g)*ny>)
-batt.AddForce((-Mbatt*g)*ny>)
-Pcm.AddForce((-Mpendule*g)*ny>)
- 
-%FW.AddForce(fg*nx>)
-%BW.AddForce(fd*nx>)
-
-% force de réaction 
-% pendule et robot
-Ro.AddForce(Frx_p*nx> + Fry_p*ny>)
-Po.AddForce((-Frx_p)*nx> + (-Fry_p)*ny>)
-% roue1 et robot
-FW.AddForce(Frx_rF*nx> + Fry_rF*ny>)
-rF.AddForce((-Frx_rF)*nx> + (-Fry_rF)*ny>) 
-% roue2 et robot
-BW.AddForce(Frx_rB*nx> + Fry_rB*ny>)
-rB.AddForce((-Frx_rB)*nx> + (-Fry_rB)*ny>) 
-
-%force normal 
-CRF.AddForce(Fry_rF*ny>)
-CRB.AddForce(Fry_rB*ny>)
-
-% force de friction 
-
-
-
-
-Roue1.AddTorque(Torque)
+help
