@@ -28,8 +28,8 @@ Constant LongueurPendule
 Constant HauteurSapin
 Constant g
 Constant ho
-Constant torque
-Constant VitAngulaire
+%Constant torque
+%Constant VitAngulaire
 
 Constant distRWM %distance entre le RW et le milieu du robot
 Constant distSolRail %distance entre le sol et le rail
@@ -42,7 +42,8 @@ Constant InertieRW = (0.5 * MasseRW * diametreRoue^2) %inertie de la roue arrier
 Constant InertieFW = (0.5 * MasseFW * diametreRoue^2) %inertie de la roue avant
 Constant InertieP = (0.5 * MassePrehenseur * diametreRoue^2) %inertie du prehenseur
 
-Variable q'',fg,fd,Nd,Ng,tension,X''
+
+Variable q'',theta'', fg, fd, Nd, Ng, tension, torque, X''
 
 R.SetMass(MasseRobot) %Ajout de la masse du robot
 P.SetMass(MassePrehenseur) %Ajout de la masse du prehenseur
@@ -55,17 +56,17 @@ FW.SetMass(MasseFW) %Ajout de la masse de la roue avant
 RW.SetInertia(RWcm,0,0,InertieRW) %Ajout de l'inertie de la roue arriere
 FW.SetInertia(FWcm,0,0,InertieFW) %Ajout de l'inertie de la roue avant
 P.SetInertia(Pcm,0,0,InertieP) %Ajout de l'inertie du prehenseur sinon ca ne voualit pas compiler
-RW.SetAngularVelocity(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue arriere
-FW.SetAngularVelocity(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue avant
+%RW.SetAngularVelocityAcceleration(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue arriere
+%FW.SetAngularVelocityAcceleration(N,VitAngulaire*nz>) %Ajout de la vitesse angulaire de la roue avant
 
 R.RotateZ(N,0)
 R.SetAngularVelocityAcceleration(N,0>)
-FW.RotateZ(N,theta)
-RW.RotateZ(N,theta)
+FW.RotateZ(N,Theta)
+RW.RotateZ(N,Theta)
 
 P.RotateZ(N,q)
 
-Ro.Translate(No,X*nx>)
+Ro.Translate(No,X*nx>) 
 
 %Eo.Translate(Rcm, 0>)
 
@@ -83,28 +84,29 @@ FWcm.Translate(Rcm,distRWM*rx>)
 
 Fwo.Translate(FWcm,-diametreRoue/2*ry>)
 
-Pcm.Translate(Rcm,-LongueurPendule*py>)
+Po.Translate(Rcm,0>) %%%%%%
+Pcm.Translate(Po,-LongueurPendule/2*py>) %%%%%%
 
-S.Translate(Pcm,-HauteurSapin/2*py>)
+S.Translate(Po,((-HauteurSapin/2)-LongueurPendule)*py>) %%%%%
 
 B.Translate(Rcm,distBatMilieu*rx>)
 
 M.Translate(Rcm,-distMotMilieu*rx>)
 
 
-VT> = Rcm.Getunitvector(Pcm)
+%VT> = Rcm.Getunitvector(Pcm)
 
 %AddForces
-Rcm.AddForce(tension*VT>)
+Rcm.AddForce(tension*py>)
 Rcm.AddForce(-MasseRobot*g*ny>)
-Pcm.AddForce(-tension*VT>)
-Pcm.AddForce(-MassePrehenseur*g*ny>)
+Po.AddForce(-tension*py>) %%%%
+Pcm.AddForce(-MassePrehenseur*g*ny>) 
 RWcm.AddForce(-MasseRW*g*ny>)
 FWcm.AddForce(-MasseFW*g*ny>)
 Fwo.AddForce(Ng*ny>)
 Rwo.AddForce(Nd*ny>)
-Rwo.AddForce(fg*ny>)
-Fwo.AddForce(fd*ny>)
+Rwo.AddForce(-fg*nx>)
+Fwo.AddForce(-fd*nx>)
 S.AddForce(-MasseSapin*g*ny>)
 B.AddForce(-MasseBatterie*g*ny>)
 M.AddForce(-MasseMoteur*g*ny>)
@@ -112,22 +114,31 @@ M.AddForce(-MasseMoteur*g*ny>)
 %Eo.AddForce(-tension*VT>)
 %EP.AddForce(tension*VT>)
 
+
+
 %AddTorques
 RW.AddTorque(torque*nz>)
-%Équations
+
+
+%Équations 
 eq[1] = dot(S1.Getdynamics(),nx>)
 eq[2] = dot(S1.Getdynamics(),ny>)
 eq[3] = dot(S1.Getdynamics(Rcm),nz>)
 eq[4] = dot(S2.Getdynamics(),nx>)
 eq[5] = dot(S2.Getdynamics(),ny>)
 eq[6] = dot(S2.Getdynamics(Pcm),nz>)
-eq[7] = EP.GetDistance(Rcm) - LongueurPendule
+eq[7] = dtdt((Theta*diametreRoue/2)-X)
+eq[8] = dot(RW.Getdynamics(RWcm),nz>)
+eq[9] = dot(FW.Getdynamics(FWcm),nz>)
+
+%(torque-r*fg-(RW.GetInertiaDyadic(RWcm))*theta'')
+
 
 %tspan
 Input tStep = 0.01, tFinal = 10 sec
 
 %Conditions initiales<
-Input q = 0 deg , fg=0 N, fd = 0 N, Nd = 10 N, Ng = 10 N, tension = 10 N, X = 0 m 
+Input q = 0 rad, q'=10 rad/s, theta = 10 rad, theta'= 10 rad/s, X=10 m, X'=10 m/s 
 
 %Constantes
 Input MasseRobot = 2 kg
@@ -141,8 +152,8 @@ Input LongueurPendule = 0.5 m
 Input HauteurSapin = 0.2 m
 Input g = 9.81 m/s^2
 Input ho = 0.5 m
-Input torque = 0.1 N*m
-Input VitAngulaire = 10 rad/s
+%Input torque = 0.1 N*m
+%Input VitAngulaire = 10 rad/s
 Input distRWM = 0.1 m
 Input distSolRail = 0.1 m
 Input distRailM = 0.1 m
@@ -151,7 +162,9 @@ Input distBatMilieu = 0.1 m
 Input distMotMilieu = 0.1 m
 Input longrobot = 0.5 m
 
-ODE (eq,q'',fg,fd,Nd,Ng,tension,X'')
+ODE (eq=0, q'',fg, fd, Nd, Ng, tension, torque, X'', theta'')
+
+output(q,tension)
 Plot ODE.1
 
 
