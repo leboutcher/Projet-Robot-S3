@@ -1,0 +1,74 @@
+NewtonianFrame N
+RigidBody P % Préhenseur
+RigidBody R % Robot 
+RigidBody rF % roue et axe
+RigidBody rB % roue et axe
+Particle Prehenseur % Préhenseur
+Particle Moteur % Moteur
+Particle batt % Batterie
+Particle sapin % Sapin
+Point mo (N) 
+Point FW (R)
+Point BW (R)
+Point CRF (rF) % point de contacte entre la roue1 et le rail
+Point CRB (rB) % point de contacte entre la roue2 et le rail
+% system
+System Robus (Moteur, batt, R)
+%System bras (Prehenseur, P)
+System sapin (Prehenseur, P, sapin)
+%constant
+Constant Mrobot %masse du robot
+Constant Mmoteur %masse du moteur
+Constant Mbatt %masse de la batterie
+Constant MPrehenseur %masse du préhensuer
+Constant Mpendule %masse du pendule
+Constant Msapin %Masse du sapin
+Constant L %dist cdm et préhensuer
+Constant h0 % hauteur obstacle
+Constant hr % hauteur rail par rapport au sol
+constant r % rayon de la roue 
+Constant hRobot % hauteur robot par raport au rail
+%Constant m % masse sapin
+constant g = 9.81 m/s^2
+constant distmO % distance de la masse a l'ocbstacle
+constant distOB % distance de l'obstacle au bac
+constant distRcm_Moteur %distance du centre de masse de R du moteur
+constant distRcm_batt %distance du centre de masse de R de la batt
+constant distRcm_BW %distance du centre de masse de R de la rout arrière
+constant distRcm_FW %distance du centre de masse de R de la rout avant
+Constant Torque
+hrobot_sol = hr + hRobot %hauteur robot par rapport au sol
+% variable
+Variable q'', X''
+Variable Frx_p, Fry_p, Frx_rF, Fry_rF, Frx_rB, Fry_rB, fg, fd
+Variable hp % hauteur préhensuer
+Variable hps % hauteur préhensuer + sapin
+% matrix de rotation
+R.RotateZ(N,0)
+P.RotateZ(R,q)
+% set Mass
+R.SetMass(Mrobot)
+Moteur.SetMass(Mmoteur*2)
+Prehenseur.SetMass(Mprehenseur)
+P.SetMass(Mpendule)
+batt.SetMass(Mbatt)
+sapin.SetMass(Msapin)
+%Translate
+mo.Translate(No,0>)
+%robot
+Rcm.Translate(mo, hrobot_sol*ny> + X*nx>)
+Ro.Translate(Rcm, 0>)
+Moteur.Translate(Rcm, distRcm_Moteur*nx>)
+batt.Translate(Rcm, distRcm_batt*nx>)
+BW.Translate(Rcm, -distRcm_BW*Rx>)
+FW.Translate(Rcm, distRcm_FW*Rx>)
+% pendule et préensaeur 
+Po.Translate(Ro, 0>)
+Pcm.Translate(Po, (L/2)*py>)
+Prehenseur.Translate(Po, L*py>)
+%position de roue 
+rFcm.Translate(FW, 0>)
+rBcm.Translate(BW, 0>)
+% point de contacte roue rail
+CRF.Translate(rFcm, r*ny>)
+help
