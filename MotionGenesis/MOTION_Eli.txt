@@ -1,0 +1,103 @@
+NewtonianFrame N 
+
+RigidBody R 			%Robot
+Rigidbody F 			%Front wheel
+RigidBody B 			%Back wheel
+RigidBody P 			%tige pendule
+
+System S1(R,F,B); 		%Robot
+System S2(R, F, B, P)
+
+Constant mR   			%Masse Robot
+Constant mF   			%Masse Front wheel
+Constant mB   			%Masse Back wheel
+Constant mP   			%Masse tige pendule
+
+Constant rayon			%rayon roue
+Constant L			%Longueur tige pendule
+Constant LR			%Longueur robot
+
+Constant b			%coeficient visqueux
+Constant g			%acceleration gravit.
+
+Point Fs(F), Bs(B)		%points de contact sol/roues
+Point RPO(P)
+
+variable q'', Fx, Fy, Nd, Ng, qW'', x''
+
+Constant Torque
+
+
+R.Setmass(mR)
+F.Setmass(mF)
+B.Setmass(mB)
+P.Setmass(mP)
+
+F.Setinertia(Fcm,0,0,0.5*mF*rayon^2)
+B.Setinertia(Bcm,0,0,0.5*mB*rayon^2)
+P.Setinertia(Pcm,0,0,(1/12)*mP*L^2)
+
+R.RotateZ(N,0)
+P.RotateZ(N,q)
+F.RotateZ(N,qW)
+B.RotateZ(N,qW)
+
+Ro.Translate(No,x*nx>)
+Rcm.Translate(Ro,0>)
+Fo.Translate(Ro,0.5*LR*nx>)
+Fcm.Translate(Fo,0>)
+Bo.Translate(Ro,-0.5*LR*nx>)
+Bcm.Translate(Bo,0>)
+Po.Translate(Ro,-L*py>)
+Pcm.Translate(Po,0.5*L*py>)
+Fs.Translate(Fo,-rayon*ny>)
+Bs.Translate(Bo,-rayon*ny>)
+RPO.Translate(Ro, 0>)
+
+Rcm.AddForce(-g*mR*ny>)
+Fcm.AddForce(-g*mF*ny>)
+Bcm.AddForce(-g*mB*ny>)
+Pcm.AddForce(-g*mP*ny>)
+
+RPO.AddForce(Fx*nx>)
+RPO.AddForce(Fy*ny>)
+Ro.AddForce(-Fx*nx>)
+Ro.AddForce(-Fy*ny>)
+
+Fs.Addforce(Nd*ny>)
+Bs.AddForce(Ng*ny>)
+
+P.AddTorque(-b*w_P_N>)
+R.AddTorque(b*w_P_N>)
+B.AddTorque(Torque*nz>)
+
+Eq[1] = dot(P.Getdynamics(Pcm),nz>)
+Eq[2] = dot(P.Getdynamics(),nx>)
+Eq[3] = dot(P.Getdynamics(),ny>)
+Eq[4] = dot(S1.Getdynamics(),nx>)
+Eq[5] = dot(S1.Getdynamics(),ny>)
+Eq[6] = dot(B.Getdynamics(Bcm),nz>)
+Eq[7] = dt(dot(v_Bs_N>, nx>))
+
+%tspan
+Input tStep = 0.01, tFinal = 10 sec, absError=1.0E-10
+
+%Conditions initiales
+Input q' = 0 deg/s ,q = 0 deg, qW' = 0 deg/s, qW = 0 deg, x' = 0 m/s, x = 0 m
+
+%Constantes
+Input mR = 3 kg
+Input rayon = 0.04 m 
+Input mP = 0.5 kg
+Input mF = 0.0018 kg
+Input mB = 0.0018 kg
+Input L = 0.5 m
+Input g = 9.81 m/s^2
+Input Torque = 0.1 N*m
+Input LR = 0.5 m
+Input b = 0.3
+
+Output t sec, q deg, qW deg, x m
+
+ODE (Eq,q'',fx,fy,Nd,Ng,qW'',x'')
+Plot ODE.1
