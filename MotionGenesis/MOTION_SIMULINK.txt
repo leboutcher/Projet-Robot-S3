@@ -78,8 +78,8 @@ Bcm.AddForce(-g*mB*ny>)
 Pcm.AddForce(-g*mP*ny>)
 Q.AddForce(-g*mQ*ny>)
 
-Fs.Addforce(Nf*ny>-Fff*nx>)
-Bs.Addforce(Nb*ny>-Ffb*nx>)
+Fs.Addforce(Nf*ny>+Fff*nx>)
+Bs.Addforce(Nb*ny>+Ffb*nx>)
 
 P.AddTorque(-b*w_P_N>)
 R.AddTorque(b*w_P_N>)
@@ -132,7 +132,7 @@ Input L = 0.5 m
 Input g = 9.81 m/s^2
 %Input Torque = 2.06 N*m
 Input LR = 0.5 m
-Input b = 0.3
+Input b = 0.03
 Input mQ = 0.05 kg
 
 %Output t sec, q deg, qWB deg, x m, qWF deg, x' m/s
@@ -142,7 +142,10 @@ Input mQ = 0.05 kg
 
 Solve(Eq,q'', Ffb, Fff, Nb, Nf, x'', qWB'', qWF'') %testsimu.m
 
-OutputEncode x m, x' m/sec, q deg, q' deg/sec
-Code Algebraic() S3GROMFileForSimulink.m( x, q, Torque )
+OutputEncode x m, x' m/sec, x'' m/sec^2, q deg, q' deg/sec, q'' deg/sec^2, qWB deg, qWB' deg/sec, qWB'' deg/sec^2, qWF deg, qWF' deg/sec, qWF'' deg/sec^2
+Code Algebraic() S3GROMFileForSimulink.m(  x, x', q, q', qWB, qWB', qWF, qWF', Torque )
+
+%OutputEncode x m, x' m/sec, q deg, q' deg/sec, qWB' deg/sec
+%Code Algebraic() S3GROMFileForSimulink.m(  x, q, Torque )
 
 %Plot ODE.1
