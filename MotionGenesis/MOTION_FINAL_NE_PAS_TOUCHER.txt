@@ -60,8 +60,8 @@ Fcm.AddForce(-g*mF*ny>)
 Bcm.AddForce(-g*mB*ny>)
 Pcm.AddForce(-g*mP*ny>)
 
-Fs.Addforce(Nf*ny>-Fff*nx>)
-Bs.Addforce(Nb*ny>-Ffb*nx>)
+Fs.Addforce(Nf*ny>+Fff*nx>)
+Bs.Addforce(Nb*ny>+Ffb*nx>)
 
 P.AddTorque(-b*w_P_N>)
 R.AddTorque(b*w_P_N>)
