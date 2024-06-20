@@ -1,0 +1,146 @@
+NewtonianFrame N 
+
+RigidBody R 			%Robot
+Rigidbody F 			%Front wheel
+RigidBody B 			%Back wheel
+RigidBody P 			%tige pendule
+
+Particle Q %Masse au bout du pendule
+
+System S1(R,F,B, P); 		%Robot + pendule
+System S2(P, Q)
+
+Constant mR   			%Masse Robot
+Constant mF   			%Masse Front wheel
+Constant mB   			%Masse Back wheel
+Constant mP   			%Masse tige pendule
+Constant mQ             %Masse sapin
+
+Constant rayon			%rayon roue
+Constant L			%Longueur tige pendule
+Constant LR			%Longueur robot
+
+Constant b			%coeficient visqueux
+Constant g			%acceleration gravit.
+
+Point Fs(F), Bs(B)		%points de contact sol/roues
+Point RPO(P)
+Point Ccorner1(R), Ccorner2(R), Ccorner3(R), Ccorner4(R), Ccm1(R), WgContact(R), WdContact(R), Bmasse(R)
+
+variable q'', Ffb, Fff, Nb, Nf, qWB'', x'', qWF''
+
+Constant Torque
+%Specified Torque
+%SetDt(Torque = 0.085)
+
+R.Setmass(mR)
+F.Setmass(mF)
+B.Setmass(mB)
+P.Setmass(mP)
+Q.Setmass(mQ)
+
+F.Setinertia(Fcm,0,0,0.5*mF*rayon^2)
+B.Setinertia(Bcm,0,0,0.5*mB*rayon^2)
+P.Setinertia(Pcm,0,0,(1/12)*mP*L^2)
+
+R.RotateZ(N,0)
+P.RotateZ(N,q)
+F.RotateZ(N, qWF)
+B.RotateZ(N, qWB)
+
+%F.SetAngularVelocityAcceleration(N, qWF*nz>)
+%B.SetAngularVelocityAcceleration(N, qWB*nz>)
+
+Ro.Translate(No,x*nx>)
+Rcm.Translate(Ro,0>)
+Fo.Translate(Ro,0.5*LR*nx>)
+Fcm.Translate(Fo,0>)
+Bo.Translate(Ro,-0.5*LR*nx>)
+Bcm.Translate(Bo,0>)
+Po.Translate(Ro,-L*py>)
+Pcm.Translate(Po,0.5*L*py>)
+Fs.Translate(Fo,-rayon*ny>)
+Bs.Translate(Bo,-rayon*ny>)
+RPO.Translate(Ro, 0>)
+Q.Translate(Po, 0>)
+
+Ccorner1.Translate(Bo, 0>)
+Ccorner4.Translate(Bo, 0>)
+Ccorner2.Translate(Fo, 0>)
+Ccorner3.Translate(Fo, 0>)
+WgContact.Translate(Bs, 0>)
+WdContact.Translate(Fs, 0>)
+Bmasse.Translate(Q, 0>)
+Ccm1.Translate(Rcm, 0>)
+
+Rcm.AddForce(-g*mR*ny>)
+Fcm.AddForce(-g*mF*ny>)
+Bcm.AddForce(-g*mB*ny>)
+Pcm.AddForce(-g*mP*ny>)
+Q.AddForce(-g*mQ*ny>)
+
+Fs.Addforce(Nf*ny>-Fff*nx>)
+Bs.Addforce(Nb*ny>-Ffb*nx>)
+
+P.AddTorque(-b*w_P_N>)
+R.AddTorque(b*w_P_N>)
+B.AddTorque(-Torque*nz>)
+
+Eq[1] = dot(S1.Getdynamics(),nx>)
+Eq[2] = dot(S1.Getdynamics(),ny>)
+Eq[3] = dot(S1.Getdynamics(Bs),nz>)
+
+Eq[4] = dot(S2.Getdynamics(Ro),nz>)
+Eq[5] = dot(B.Getdynamics(Bcm),nz>)
+Eq[6] = dot(F.Getdynamics(Fcm),nz>)
+
+Eq[7] = dt(dot(Bs.GetVelocity(N), nx>))
+Eq[8] = dt(dot(Fs.GetVelocity(N), nx>))
+
+
+Ccorner1x = dot(nx>, Ccorner1.GetPosition(No))
+Ccorner1y = dot(ny>, Ccorner1.GetPosition(No))
+Ccorner2x = dot(nx>, Ccorner2.GetPosition(No))
+Ccorner2y = dot(ny>, Ccorner2.GetPosition(No))
+Ccorner3x = dot(nx>, Ccorner3.GetPosition(No))
+Ccorner3y = dot(ny>, Ccorner3.GetPosition(No))
+Ccorner4x = dot(nx>, Ccorner4.GetPosition(No))
+Ccorner4y = dot(ny>, Ccorner4.GetPosition(No))
+Ccmx = dot(nx>, Ccm1.GetPosition(No))
+Ccmy = dot(ny>, Ccm1.GetPosition(No))
+Bx = dot(nx>, Bmasse.GetPosition(No))
+By = dot(ny>, Bmasse.GetPosition(No))
+WgContactx = dot(nx>, WgContact.GetPosition(No))
+WgContacty = dot(ny>, WgContact.GetPosition(No))
+WdContactx = dot(nx>, WdContact.GetPosition(No))
+WdContacty = dot(ny>, WdContact.GetPosition(No))
+
+
+
+%tspan
+Input tStep = 0.01, tFinal = 10 sec, absError=1.0E-10
+
+%Conditions initiales
+Input q' = 0 deg/s, q = 0 deg, qWF = 0 deg, x' = 0 m/s, x = 0 m, qWB = 0 deg, qWB' = 0 deg/s, qWF' = 0 deg/s
+
+%Constantes
+Input mR = 3 kg
+Input rayon = 0.04 m 
+Input mP = 0.5 kg
+Input mF = 0.0018 kg
+Input mB = 0.0018 kg
+Input L = 0.5 m
+Input g = 9.81 m/s^2
+Input Torque = 2.06 N*m
+Input LR = 0.5 m
+Input b = 0.3
+Input mQ = 0.05 kg
+
+%Output t sec, q deg, qWB deg, x m, qWF deg, x' m/s
+
+%Output t sec, x m, x' m/sec, q deg, q' deg/s, qWB' deg/sec, qWF' deg/sec, Ffb N, Fff N, Nb N, Nf N, Torque N*m
+%Output Ccorner1x, Ccorner1y, Ccorner2x, Ccorner2y, Ccorner3x, Ccorner3y, Ccorner4x, Ccorner4y, Ccmx, Ccmy, Bx, By, WgContactx, WgContacty, WdContactx, WdContacty
+
+ODE(Eq,q'', Ffb, Fff, Nb, Nf, x'', qWB'', qWF'') %testsimu.m
+
+Plot ODE.1
