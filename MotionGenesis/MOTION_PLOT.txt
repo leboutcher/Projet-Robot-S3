@@ -5,9 +5,9 @@ Rigidbody F 			%Front wheel
 RigidBody B 			%Back wheel
 RigidBody P 			%tige pendule
 
-Particle Q %Masse au bout du pendule
+Particle Q              %Masse au bout du pendule
 
-System S1(R,F,B, P); 		%Robot + pendule
+System S1(R,F,B, P, Q); 	%Robot + pendule
 System S2(P, Q)
 
 Constant mR   			%Masse Robot
@@ -17,11 +17,11 @@ Constant mP   			%Masse tige pendule
 Constant mQ             %Masse sapin
 
 Constant rayon			%rayon roue
-Constant L			%Longueur tige pendule
-Constant LR			%Longueur robot
+Constant L			    %Longueur tige pendule
+Constant LR			    %Longueur robot
 
-Constant b			%coeficient visqueux
-Constant g			%acceleration gravit.
+Constant b			    %coeficient visqueux
+Constant g			    %acceleration gravit.
 
 Point Fs(F), Bs(B)		%points de contact sol/roues
 Point RPO(P)
@@ -30,8 +30,6 @@ Point Ccorner1(R), Ccorner2(R), Ccorner3(R), Ccorner4(R), Ccm1(R), WgContact(R),
 variable q'', Ffb, Fff, Nb, Nf, qWB'', x'', qWF''
 
 Constant Torque
-%Specified Torque
-%SetDt(Torque = 0.085)
 
 R.Setmass(mR)
 F.Setmass(mF)
@@ -47,9 +45,6 @@ R.RotateZ(N,0)
 P.RotateZ(N,q)
 F.RotateZ(N, qWF)
 B.RotateZ(N, qWB)
-
-%F.SetAngularVelocityAcceleration(N, qWF*nz>)
-%B.SetAngularVelocityAcceleration(N, qWB*nz>)
 
 Ro.Translate(No,x*nx>)
 Rcm.Translate(Ro,0>)
@@ -115,10 +110,8 @@ WgContacty = dot(ny>, WgContact.GetPosition(No))
 WdContactx = dot(nx>, WdContact.GetPosition(No))
 WdContacty = dot(ny>, WdContact.GetPosition(No))
 
-
-
 %tspan
-Input tStep = 0.01, tFinal = 10 sec, absError=1.0E-10
+Input tStep = 0.01, tFinal = 100 sec, absError=1.0E-10
 
 %Conditions initiales
 Input q' = 0 deg/s, q = 0 deg, qWF = 0 deg, x' = 0 m/s, x = 0 m, qWB = 0 deg, qWB' = 0 deg/s, qWF' = 0 deg/s
@@ -131,16 +124,11 @@ Input mF = 0.0018 kg
 Input mB = 0.0018 kg
 Input L = 0.5 m
 Input g = 9.81 m/s^2
-Input Torque = 2.06 N*m
+Input Torque = 0.8 N*m %2.06 pour 4753/ 0.8 pour 4751
 Input LR = 0.5 m
-Input b = 0.3
+Input b = 0.03
 Input mQ = 0.05 kg
 
-%Output t sec, q deg, qWB deg, x m, qWF deg, x' m/s
-
-%Output t sec, x m, x' m/sec, q deg, q' deg/s, qWB' deg/sec, qWF' deg/sec, Ffb N, Fff N, Nb N, Nf N, Torque N*m
-%Output Ccorner1x, Ccorner1y, Ccorner2x, Ccorner2y, Ccorner3x, Ccorner3y, Ccorner4x, Ccorner4y, Ccmx, Ccmy, Bx, By, WgContactx, WgContacty, WdContactx, WdContacty
-
-ODE(Eq,q'', Ffb, Fff, Nb, Nf, x'', qWB'', qWF'') %testsimu.m
+ODE(Eq,q'', Ffb, Fff, Nb, Nf, x'', qWB'', qWF'')
 
 Plot ODE.1

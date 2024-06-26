@@ -5,16 +5,16 @@ Rigidbody F 			%Front wheel
 RigidBody B 			%Back wheel
 RigidBody P 			%tige pendule
 
-Particle Q %Masse au bout du pendule
+Particle Q              %Masse au bout du pendule
 
-System S1(R,F,B, P); 		%Robot + pendule
+System S1(R,F,B, P, Q); 		%Robot + pendule
 System S2(P, Q)
 
 Constant mR   			%Masse Robot
 Constant mF   			%Masse Front wheel
 Constant mB   			%Masse Back wheel
 Constant mP   			%Masse tige pendule
-Constant mQ             %Masse sapin
+Constant mQ             	%Masse sapin
 
 Constant rayon			%rayon roue
 Constant L			%Longueur tige pendule
@@ -30,7 +30,6 @@ Point Ccorner1(R), Ccorner2(R), Ccorner3(R), Ccorner4(R), Ccm1(R), WgContact(R),
 variable q'', Ffb, Fff, Nb, Nf, qWB'', x'', qWF''
 
 Specified Torque
-%SetDt(Torque = 0.085)
 
 R.Setmass(mR)
 F.Setmass(mF)
@@ -46,9 +45,6 @@ R.RotateZ(N,0)
 P.RotateZ(N,q)
 F.RotateZ(N, qWF)
 B.RotateZ(N, qWB)
-
-%F.SetAngularVelocityAcceleration(N, qWF*nz>)
-%B.SetAngularVelocityAcceleration(N, qWB*nz>)
 
 Ro.Translate(No,x*nx>)
 Rcm.Translate(Ro,0>)
@@ -130,22 +126,11 @@ Input mF = 0.0018 kg
 Input mB = 0.0018 kg
 Input L = 0.5 m
 Input g = 9.81 m/s^2
-%Input Torque = 2.06 N*m
 Input LR = 0.5 m
 Input b = 0.03
 Input mQ = 0.05 kg
 
-%Output t sec, q deg, qWB deg, x m, qWF deg, x' m/s
-
-%Output t sec, x m, x' m/sec, q deg, q' deg/s, qWB' deg/sec, qWF' deg/sec, Ffb N, Fff N, Nb N, Nf N, Torque N*m
-%Output Ccorner1x, Ccorner1y, Ccorner2x, Ccorner2y, Ccorner3x, Ccorner3y, Ccorner4x, Ccorner4y, Ccmx, Ccmy, Bx, By, WgContactx, WgContacty, WdContactx, WdContacty
-
-Solve(Eq,q'', Ffb, Fff, Nb, Nf, x'', qWB'', qWF'') %testsimu.m
+Solve(Eq,q'', Ffb, Fff, Nb, Nf, x'', qWB'', qWF'')
 
 OutputEncode x m, x' m/sec, x'' m/sec^2, q deg, q' deg/sec, q'' deg/sec^2, qWB deg, qWB' deg/sec, qWB'' deg/sec^2, qWF deg, qWF' deg/sec, qWF'' deg/sec^2
 Code Algebraic() S3GROMFileForSimulink.m(  x, x', q, q', qWB, qWB', qWF, qWF', Torque )
-
-%OutputEncode x m, x' m/sec, q deg, q' deg/sec, qWB' deg/sec
-%Code Algebraic() S3GROMFileForSimulink.m(  x, q, Torque )
-
-%Plot ODE.1
