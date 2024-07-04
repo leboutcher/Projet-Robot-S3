@@ -101,6 +101,9 @@ void MainWindow::connectButtons(){
     connect(ui->pulseButton, SIGNAL(clicked()), this, SLOT(sendPulseStart()));
     connect(ui->checkBox, SIGNAL(stateChanged(int)), this, SLOT(manageRecording(int)));
     connect(ui->pushButton_Params, SIGNAL(clicked()), this, SLOT(sendPID()));
+    // emant
+    connect(ui->onMagButton, SIGNAL(clicked()), this, SLOT(onMagButtonClicked()));
+    connect(ui->offMagButton, SIGNAL(clicked()), this, SLOT(offMagButtonClicked()));
 }
 
 void MainWindow::connectSpinBoxes(){
@@ -237,4 +240,56 @@ void MainWindow::onMessageReceived(QString msg){
 void MainWindow::onPeriodicUpdate(){
     // Fonction SLOT appelee a intervalle definie dans le constructeur
     qDebug().noquote() << "*";
+}
+
+
+void MainWindow::onMagButtonClicked() {
+    // Commenter au besoin
+    //qDebug().noquote() <<"Bouton lumière";
+
+    /*
+     * Étape 5. Créer un objet QJsonObject contenant la paire: "turnOnLight" et la durée d'allumage en secondes.
+     * Décommenter le reste des lignes de la fonction ensuite. Ces lignes se chargent de formater
+     * le message et de le transmettre par le port série.
+    */
+    // TODO...
+    
+    QJsonObject jsonObject
+    {
+        {"magOn", 1}
+    };
+    
+    // Formatage en document JSON
+    QJsonDocument doc(jsonObject);
+
+     //Casting en type QString
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    // Envoi du message
+    sendMessage(strJson);
+}
+void MainWindow::offMagButtonClicked() {
+    // Commenter au besoin
+    //qDebug().noquote() <<"Bouton lumière";
+
+    /*
+     * Étape 5. Créer un objet QJsonObject contenant la paire: "turnOnLight" et la durée d'allumage en secondes.
+     * Décommenter le reste des lignes de la fonction ensuite. Ces lignes se chargent de formater
+     * le message et de le transmettre par le port série.
+    */
+    // TODO...
+    
+    QJsonObject jsonObject
+    {
+        {"magOff", 1}
+    };
+    
+    // Formatage en document JSON
+    QJsonDocument doc(jsonObject);
+
+     //Casting en type QString
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    // Envoi du message
+    sendMessage(strJson);
 }

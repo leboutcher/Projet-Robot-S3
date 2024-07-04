@@ -49,6 +49,8 @@ private slots:
     void changeJsonKeyValue();
     void startSerialCom(QString);
     void sendPID();
+    void onMagButtonClicked();
+    void offMagButtonClicked();
 
 private:
     void connectTimers(int updateRate);
