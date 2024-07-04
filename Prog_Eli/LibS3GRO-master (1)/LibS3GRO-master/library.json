@@ -1,0 +1,20 @@
+{
+    "name":"LibS3GRO",
+    "description":"Library for Université de Sherbrooke S3 Robotic project",
+    "authors":
+    [
+      {
+        "name": "Jean-Samuel Lauzon",
+        "maintainer": true
+      }
+  
+    ],
+    "dependencies":
+    [
+      {"name": "Adafruit INA219"},
+	    {"name": "SoftwareSerial"},
+      {"name": "ArduinoJson"},
+      {"name": "Grove IMU 9DOF"}
+    ],
+    "version": "1.0.5"
+  }
