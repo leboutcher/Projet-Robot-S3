@@ -6,7 +6,7 @@
 */
 
 /*------------------------------ Librairies ---------------------------------*/
-#include <LibS3GRO.h>
+#include "LibS3GRO.h"
 #include <ArduinoJson.h>
 #include <libExample.h> // Vos propres librairies
 /*------------------------------ Constantes ---------------------------------*/
