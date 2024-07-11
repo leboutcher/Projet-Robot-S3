@@ -163,11 +163,11 @@ void endPulse(){
 }
 
 void startMag(){
-  pinMode(MAGPIN, HIGH);
+  digitalWrite(MAGPIN, HIGH);
 }
 
 void endMag(){
-  pinMode(MAGPIN, LOW);
+  digitalWrite(MAGPIN, LOW);
 }
 
 void sendMsg(){
