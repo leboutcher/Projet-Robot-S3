@@ -180,10 +180,12 @@ void endPulse(){
 
 void startMag(){
   digitalWrite(MAGPIN, HIGH);
+  shouldMagOff_ = false;
 }
 
 void endMag(){
   digitalWrite(MAGPIN, LOW);
+  shouldMagOn_ = false;
 }
 
 void sendMsg(){
@@ -214,6 +216,7 @@ void sendMsg(){
   doc["distance"] = total_distance_traveled;
   energy+= abs(AX_.getCurrent()) * abs(AX_.getVoltage());
   doc["energie"] = energy;
+  doc["angle"] = computeAngle();
 
   // Serialisation
   serializeJson(doc, Serial);
