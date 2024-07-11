@@ -210,7 +210,7 @@ void sendMsg(){
   doc["isGoal"] = pid_.isAtGoal();
   doc["actualTime"] = pid_.getActualDt();
   doc["position"] = position;
-  total_distance_traveled += position - last_position
+  total_distance_traveled += position - last_position;
   doc["distance"] = total_distance_traveled;
   energy+= abs(AX_.getCurrent()) * abs(AX_.getVoltage());
   doc["energie"] = energy;
