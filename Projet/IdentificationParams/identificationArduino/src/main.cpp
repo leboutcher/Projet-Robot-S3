@@ -24,9 +24,6 @@
 #define MAXPIDOUTPUT    kp*1.3         // Valeur maximale du PID
 #define WHEELCIRCUM     2*3.1416*0.08  // Circonférence des roues
 
-#define POTMAXOUTPUT    1024           // Valeur maximale de lecture du potentiomètre
-#define POTMAXANGLE     255            // Valeur maximal d'angle du potentiomètre
-
 /*---------------------------- variables globales ---------------------------*/
 
 ArduinoX AX_;                       // objet arduinoX
@@ -299,5 +296,5 @@ void PIDgoalReached(){
 }
 
 double computeAngle(){
-  return analogRead(POTPIN)/POTMAXOUTPUT * POTMAXANGLE;
+  return (analogRead(POTPIN)-535)*4.55;
 }
