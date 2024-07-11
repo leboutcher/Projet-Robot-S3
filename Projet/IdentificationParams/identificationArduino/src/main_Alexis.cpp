@@ -17,11 +17,11 @@
 #define MAGPIN          32          // Port numerique pour electroaimant
 #define POTPIN          A5          // Port analogique pour le potentiometre
 
-#define PASPARTOUR      64          // Nombre de pas par tour du moteur
-#define RAPPORTVITESSE  50*0.6          // Rapport de vitesse du moteur
+#define PASPARTOUR      64*50       // Nombre de pas par tour du moteur
+#define RAPPORTVITESSE  0.6    // Rapport de vitesse du moteur
 
 #define MAXPIDOUTPUT    10*1.3      // Valeur maximale du PID
-#define WHEELCIRCUM     2*3.1416*0.08   // Circonférence des roues
+#define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
 
 /*---------------------------- variables globales ---------------------------*/
 
@@ -86,12 +86,12 @@ void setup() {
   timerPulse_.setCallback(endPulse);
 
   // Initialisation du PID
-  pid_.setGains(10, 0.01 , 1);
+  pid_.setGains(10, 0.01 ,1);
   // Attache des fonctions de retour
   pid_.setMeasurementFunc(PIDmeasurement);
   pid_.setCommandFunc(PIDcommand);
   pid_.setAtGoalFunc(PIDgoalReached);
-  pid_.setEpsilon(0.001);
+  pid_.setEpsilon(0.01);
   pid_.setPeriod(200);
 }
 
@@ -240,7 +240,7 @@ void readMsg(){
 // Fonctions pour le PID
 double PIDmeasurement(){
   // To do
-  int pulses = AX_.readEncoder(0);
+  unsigned long pulses = AX_.readEncoder(0);
   float nb_turns = (pulses / PASPARTOUR ) * RAPPORTVITESSE;
 
   float distance_traveled = nb_turns * WHEELCIRCUM;
@@ -260,6 +260,7 @@ void PIDcommand(double cmd){
 }
 void PIDgoalReached(){
   // To do
+  pid_.setGoal(0);
   AX_.setMotorPWM(0,0);
   AX_.resetEncoder(0);
 }
