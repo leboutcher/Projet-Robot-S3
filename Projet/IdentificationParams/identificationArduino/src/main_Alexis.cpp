@@ -21,7 +21,7 @@
 #define RAPPORTVITESSE  50*0.6          // Rapport de vitesse du moteur
 
 #define MAXPIDOUTPUT    10*1.3      // Valeur maximale du PID
-#define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
+#define WHEELCIRCUM     2*3.1416*0.08   // Circonférence des roues
 
 /*---------------------------- variables globales ---------------------------*/
 

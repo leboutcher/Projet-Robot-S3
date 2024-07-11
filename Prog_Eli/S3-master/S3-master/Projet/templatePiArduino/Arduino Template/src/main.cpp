@@ -7,6 +7,7 @@
 
 /*------------------------------ Librairies ---------------------------------*/
 #include <ArduinoJson.h> // librairie de syntaxe JSON
+#include <Arduino.h>
 #include <SPI.h> // librairie Communication SPI
 #include <LibS3GRO.h>
 
@@ -19,7 +20,10 @@
 #define POTPIN          A5          // Port analogique pour le potentiometre
 
 #define PASPARTOUR      64          // Nombre de pas par tour du moteur
-#define RAPPORTVITESSE  50          // Rapport de vitesse du moteur
+#define RAPPORTVITESSE  0.6/50          // Rapport de vitesse du moteur
+
+#define MAXPIDOUTPUT    10*1.3      // Valeur maximale du PID
+#define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
 
 /*---------------------------- variables globales ---------------------------*/
 
@@ -41,7 +45,7 @@ SoftTimer timerSendMsg_;            // chronometre d'envoie de messages
 SoftTimer timerPulse_;              // chronometre pour la duree d'un pulse
 
 uint16_t pulseTime_ = 0;            // temps dun pulse en ms
-float PWM_des_ = 0;                 // PWM desire pour les moteurs
+float PWM_des_ = 1 ;                 // PWM desire pour les moteurs
 
 
 float Axyz[3];                      // tableau pour accelerometre
@@ -57,15 +61,18 @@ void reverse();
 void sendMsg(); 
 void readMsg();
 void serialEvent();
-void runsequence();
+void runSequence();
+double PIDmeasurement();
+void PIDcommand(double cmd);
+void PIDgoalReached();
 
 /*---------------------------- fonctions "Main" -----------------------------*/
 
 void setup() {
   Serial.begin(BAUD);               // initialisation de la communication serielle
   AX_.init();                       // initialisation de la carte ArduinoX 
-  imu_.init();                      // initialisation de la centrale inertielle
-  vexEncoder_.init(2,3);            // initialisation de l'encodeur VEX
+  //imu_.init();                      // initialisation de la centrale inertielle
+  //vexEncoder_.init(2,3);            // initialisation de l'encodeur VEX
   // attache de l'interruption pour encodeur vex
   attachInterrupt(vexEncoder_.getPinInt(), []{vexEncoder_.isr();}, FALLING);
   
@@ -75,16 +82,37 @@ void setup() {
   timerSendMsg_.enable();
   
   // Initialisation du PID
-  pid_.setGains(0.25,0.1 ,0);
+  pid_.setGains(10, 0.01 ,1);
   // Attache des fonctions de retour
-  pid_.setEpsilon(0.001);
+  pid_.setMeasurementFunc(PIDmeasurement);
+  pid_.setCommandFunc(PIDcommand);
+  pid_.setAtGoalFunc(PIDgoalReached);
+  pid_.setEpsilon(0.01);
   pid_.setPeriod(200);
+  pid_.setGoal(1);
+  pid_.enable();
+
 }
   
 /* Boucle principale (infinie)*/
 void loop() {
 
-  if(shouldRead_){
+  // mise à jour du PID
+  pid_.run();
+  //Serial.println("PID");
+
+  /*RunForward_ = true;
+  bool RunForward_ = true;
+  Serial.print("RunForward: ");
+  Serial.println(RunForward_ ? "true" : "false");
+  runSequence();
+  stop_ = true;
+  runSequence();
+  RunReverse_ = true;
+  runSequence();
+  stop_ = true;
+  runSequence();
+ /*if(shouldRead_){
     readMsg();
   }
   if(shouldSend_){
@@ -94,10 +122,7 @@ void loop() {
 
   // mise a jour des chronometres
   timerSendMsg_.update();
-  timerPulse_.update();
-  
-  // mise à jour du PID
-  pid_.run();
+  timerPulse_.update();*/
 }
 
 /*---------------------------Definition de fonctions ------------------------*/
@@ -108,23 +133,42 @@ void timerCallback(){shouldSend_ = true;}
 
 void forward(){
   /* Faire rouler le robot vers l'avant à une vitesse désirée */
-  AX_.setMotorPWM(0, PWM_des_);
-  AX_.setMotorPWM(1, PWM_des_);
-  Direction_ = 1;
+  unsigned long timer = millis();
+  while (millis() < timer + 1000)
+  {
+    AX_.setMotorPWM(0, PWM_des_);
+    AX_.setMotorPWM(1, PWM_des_);
+    Direction_ = 1;
+  }
+    AX_.setMotorPWM(0, 0); // Stop motor 0
+    AX_.setMotorPWM(1, 0); // Stop motor 1
+    Direction_ = 0;
+
 }
 
 void stop(){
   /* Stopper le robot */
-  AX_.setMotorPWM(0,0);
-  AX_.setMotorPWM(1,0);
-  Direction_ = 0;
-}
+  unsigned long timer = millis();
+  while (millis() < timer + 1000)
+  {
+    AX_.setMotorPWM(0,0);
+    AX_.setMotorPWM(1,0);
+    Direction_ = 0;
+  }
+}    
 
 void reverse(){
   /* Faire rouler le robot vers l'arrière à une vitesse désirée */
-  AX_.setMotorPWM(0, -PWM_des_);
-  AX_.setMotorPWM(1, -PWM_des_);
-  Direction_ = -1;
+  unsigned long timer2 = millis();
+  while (millis() < timer2 + 1000)
+  {
+    AX_.setMotorPWM(0, -PWM_des_);
+    AX_.setMotorPWM(1, -PWM_des_);
+    Direction_ = -1;
+  }
+    AX_.setMotorPWM(0, 0); // Stop motor 0
+    AX_.setMotorPWM(1, 0); // Stop motor 1
+    Direction_ = 0;
 }
 void sendMsg(){
   /* Envoit du message Json sur le port seriel */
@@ -196,14 +240,52 @@ void runSequence(){
 /*Exemple de fonction pour faire bouger le robot en avant et en arrière.*/
 
   if(RunForward_){
+
     forward();
   }
 
-  if(stop_){
-    forward();
+  if (stop_){
+    stop();
   }
-  if(RunReverse_){
+  if (RunReverse_){
     reverse();
   }
+  RunForward_ = false;
+  stop_ = false;
+  RunReverse_ = false;
+}
 
+double PIDmeasurement(){
+  // To do
+  unsigned long pulses = AX_.readEncoder(0);
+  float nb_turns = (pulses/(PASPARTOUR*50) )*0.6; //à la sortie du moteur, il y a un rapport de 1:50 et un rapport de 0.6 entre le moteur et la roue
+
+  Serial.print("Pulses: ");
+  Serial.println(pulses);
+
+  Serial.print("NB Turns: ");
+  Serial.println(nb_turns);
+
+  float distance_traveled = nb_turns * WHEELCIRCUM;
+
+  Serial.print("Distance Traveled: ");
+  Serial.println(distance_traveled);
+
+  return distance_traveled;
+}
+void PIDcommand(double cmd){
+  // To do
+  cmd = cmd / MAXPIDOUTPUT;
+  if (cmd > 1.0) {
+    cmd = 1.0;
+  } else if (cmd < -1.0) {
+    cmd = -1.0;
+  }
+
+  AX_.setMotorPWM(0,cmd);
+}
+void PIDgoalReached(){
+  // To do
+  AX_.setMotorPWM(0,0);
+  AX_.resetEncoder(0);
 }
