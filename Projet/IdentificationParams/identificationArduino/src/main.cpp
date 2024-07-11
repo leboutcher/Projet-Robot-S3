@@ -181,12 +181,10 @@ void endPulse(){
 
 void startMag(){
   digitalWrite(MAGPIN, HIGH);
-  shouldMagOff_ = false;
 }
 
 void endMag(){
   digitalWrite(MAGPIN, LOW);
-  shouldMagOn_ = false;
 }
 
 void sendMsg(){
@@ -268,11 +266,13 @@ void readMsg(){
   parse_msg = doc["magOn"];
   if(!parse_msg.isNull()){
     shouldMagOn_ = doc["magOn"];
+    shouldMagOff_ = false;
   }
 
   parse_msg = doc["magOff"];
   if(!parse_msg.isNull()){
     shouldMagOff_ = doc["magOff"];
+    shouldMagOn_ = false;
   }
 
   parse_msg = doc["seqOn"];
