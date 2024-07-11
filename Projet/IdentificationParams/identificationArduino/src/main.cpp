@@ -52,8 +52,9 @@ float Axyz[3];                      // tableau pour accelerometre
 float Gxyz[3];                      // tableau pour giroscope
 float Mxyz[3];                      // tableau pour magnetometre
 double total_distance_traveled;     // variable qui garde la distance totale parcourue
-double current_position;            // variable qui garde la position actuelle du robot
-double energy;                  // variable qui garde la puissance totale consommée
+double energy;                      // variable qui garde la puissance totale consommée
+double position;                    // variable qui garde la position courante du robot
+double last_position                // variable qui garde la dernière position
 
 bool goalreached = false;           // variable pour indiquer si l'objectif est atteint
 
@@ -101,7 +102,8 @@ void setup() {
   //attachInterrupt(vexEncoder_.getPinInt(), []{vexEncoder_.isr();}, FALLING);
 
   // Initialisation position
-  current_position = 0;
+  position = 0;
+  last_position = 0;
   energy = 0;
 
   // Chronometre envoie message
@@ -207,8 +209,10 @@ void sendMsg(){
   doc["gyroZ"] = imu_.getGyroZ();
   doc["isGoal"] = pid_.isAtGoal();
   doc["actualTime"] = pid_.getActualDt();
+  doc["position"] = position;
+  total_distance_traveled += position - last_position
   doc["distance"] = total_distance_traveled;
-  doc["position"] = current_position;
+  energy+= abs(AX_.getCurrent()) * abs(AX_.getVoltage());
   doc["energie"] = energy;
 
   // Serialisation
@@ -283,16 +287,12 @@ void readMsg(){
 // Fonctions pour le PID
 double PIDmeasurement(){
   // To do
+  last_position = position
   unsigned long pulses = AX_.readEncoder(0);
   float nb_turns = (pulses / PASPARTOUR ) * RAPPORTVITESSE;
+  position = nb_turns * WHEELCIRCUM;
 
-  float distance_traveled = nb_turns * WHEELCIRCUM;
-
-  total_distance_traveled += abs(distance_traveled);
-  current_position += distance_traveled;
-  energy+= abs(AX_.getCurrent()) * abs(AX_.getVoltage());
-
-  return distance_traveled;
+  return position;
 }
 void PIDcommand(double cmd){
   // To do
