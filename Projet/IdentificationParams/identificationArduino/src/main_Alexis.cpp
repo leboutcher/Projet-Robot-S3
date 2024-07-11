@@ -20,7 +20,8 @@
 #define PASPARTOUR      64*50       // Nombre de pas par tour du moteur
 #define RAPPORTVITESSE  0.6    // Rapport de vitesse du moteur
 
-#define MAXPIDOUTPUT    10*1.3      // Valeur maximale du PID
+#define kp              15
+#define MAXPIDOUTPUT    kp*1.3      // Valeur maximale du PID
 #define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
 
 /*---------------------------- variables globales ---------------------------*/
@@ -37,6 +38,8 @@ volatile bool shouldPulse_ = false; // drapeau pour effectuer un pulse
 volatile bool shouldMagOn_ = false; // drapeau pour activer l'électro-aimant
 volatile bool shouldMagOff_ = false;// drapeau pour désactiver l'électro-aimant
 volatile bool isInPulse_ = false;   // drapeau pour effectuer un pulse
+volatile bool shouldSeq = false;    // drapeau pour commencer la séquence
+volatile bool shouldStopSeq = false;// drapeau pour arrêterla séquence
 
 SoftTimer timerSendMsg_;            // chronometre d'envoie de messages
 SoftTimer timerPulse_;              // chronometre pour la duree d'un pulse
@@ -48,6 +51,9 @@ float pulsePWM_ = 0;                // Amplitude de la tension au moteur [-1,1]
 float Axyz[3];                      // tableau pour accelerometre
 float Gxyz[3];                      // tableau pour giroscope
 float Mxyz[3];                      // tableau pour magnetometre
+double total_distance_traveled;     // variable qui garde la distance totale parcourue
+double current_position;            // variable qui garde la position actuelle du robot
+double energy;                  // variable qui garde la puissance totale consommée
 
 /*------------------------- Prototypes de fonctions -------------------------*/
 
@@ -77,6 +83,10 @@ void setup() {
   // attache de l'interruption pour encodeur vex
   //attachInterrupt(vexEncoder_.getPinInt(), []{vexEncoder_.isr();}, FALLING);
 
+  // Initialisation position
+  current_position = 0;
+  energy = 0;
+
   // Chronometre envoie message
   timerSendMsg_.setDelay(UPDATE_PERIODE);
   timerSendMsg_.setCallback(timerCallback);
@@ -86,7 +96,7 @@ void setup() {
   timerPulse_.setCallback(endPulse);
 
   // Initialisation du PID
-  pid_.setGains(10, 0.01 ,1);
+  pid_.setGains(kp, 0.01 ,1);
   // Attache des fonctions de retour
   pid_.setMeasurementFunc(PIDmeasurement);
   pid_.setCommandFunc(PIDcommand);
@@ -178,6 +188,9 @@ void sendMsg(){
   doc["gyroZ"] = imu_.getGyroZ();
   doc["isGoal"] = pid_.isAtGoal();
   doc["actualTime"] = pid_.getActualDt();
+  doc["distance"] = total_distance_traveled;
+  doc["position"] = current_position;
+  doc["energie"] = energy;
 
   // Serialisation
   serializeJson(doc, Serial);
@@ -245,6 +258,10 @@ double PIDmeasurement(){
 
   float distance_traveled = nb_turns * WHEELCIRCUM;
 
+  total_distance_traveled += abs(distance_traveled);
+  current_position += distance_traveled;
+  energy+= abs(AX_.getCurrent) * abs(AX_.getVoltage());
+
   return distance_traveled;
 }
 void PIDcommand(double cmd){
@@ -260,7 +277,7 @@ void PIDcommand(double cmd){
 }
 void PIDgoalReached(){
   // To do
-  pid_.setGoal(0);
+  //pid_.setGoal(0);
   AX_.setMotorPWM(0,0);
-  AX_.resetEncoder(0);
+  //AX_.resetEncoder(0);
 }
