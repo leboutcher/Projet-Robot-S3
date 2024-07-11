@@ -61,14 +61,13 @@ bool goalreached = false;           // variable pour indiquer si l'objectif est 
 // Enumération pour les différentes séquences
 enum deplacement
 {
-  START,
-  FORWARD_05,
-  FORWARD_BAC,
-  BACKWARD_03,
-  HOME,
-  STOP
+  START = 0,
+  FORWARD_05 = 1,
+  FORWARD_BAC = 2,
+  BACKWARD_03 = 3,
+  HOME = 4,
+  STOP = 5,
 } deplacement;
-bool DONE = false;
 
 
 /*------------------------- Prototypes de fonctions -------------------------*/
@@ -127,7 +126,9 @@ void setup() {
 
 /* Boucle principale (infinie)*/
 void loop() {
-  
+  sequence();
+  pid_.run();
+
   if(shouldRead_){
     readMsg();
   }
@@ -151,7 +152,6 @@ void loop() {
   timerPulse_.update();
 
   // mise à jour du PID
-  pid_.run();
 }
 
 /*---------------------------Definition de fonctions ------------------------*/
@@ -329,52 +329,53 @@ void sequence()
       // Début de la séquence
       deplacement = FORWARD_05;
       break;
+
     case FORWARD_05:
       pid_.setGoal(0.5);
+      if(goalreached && computeAngle() < 12)
       {
-        if(goalreached&&computeAngle()<12)
-        {
-          goalreached = false;
-          deplacement = BACKWARD_03;
-          break;
-        }
-        if(goalreached&&computeAngle()>12)
-        {
-          goalreached = false;
-          deplacement = FORWARD_BAC;
-          break;
-        }
+        goalreached = false;
+        deplacement = BACKWARD_03;
       }
+      else if(goalreached && computeAngle() > 12)
+      {
+        goalreached = false;
+        deplacement = FORWARD_BAC;
+      }
+      break;
+
     case HOME:
       pid_.setGoal(0);
+      if(goalreached && computeAngle() <= 5)
       {
-        if(goalreached&&computeAngle()<=5)
-        {
-          goalreached = false;
-          //Electro-aimant ON
-          deplacement = STOP;
-        }
+        goalreached = false;
+        // Electro-aimant ON
+        deplacement = STOP;
       }
+      break;
 
     case STOP:
       pid_.setGoal(0);
+      if(goalreached && computeAngle() <= 5)
       {
-        if(goalreached&&computeAngle()<=5)
-        {
-          goalreached = false;
-          //Electro-aimant ON
-          deplacement = FORWARD_05;
-        }
+        goalreached = false;
+        // Electro-aimant ON
+        deplacement = FORWARD_05;
       }
+      break;
+
     case FORWARD_BAC:
       pid_.setGoal(1.2);
+      if (goalreached && computeAngle() <= 5)
       {
-        if (goalreached&&computeAngle()<=5)
-        {
-          goalreached = false;
-          //Electro-aimant off
-          deplacement = HOME;
-        }
-      } 
+        goalreached = false;
+        // Electro-aimant off
+        deplacement = HOME;
+      }
+      break;
+
+    default:
+      // Handle unexpected values
+      break;
   }
 }
