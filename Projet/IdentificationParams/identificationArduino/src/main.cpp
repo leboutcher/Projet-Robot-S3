@@ -54,7 +54,7 @@ float Mxyz[3];                      // tableau pour magnetometre
 double total_distance_traveled;     // variable qui garde la distance totale parcourue
 double energy;                      // variable qui garde la puissance totale consommée
 double position;                    // variable qui garde la position courante du robot
-double last_position                // variable qui garde la dernière position
+double last_position;                // variable qui garde la dernière position
 
 bool goalreached = false;           // variable pour indiquer si l'objectif est atteint
 
