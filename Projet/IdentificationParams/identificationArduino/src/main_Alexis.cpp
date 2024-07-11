@@ -21,7 +21,7 @@
 #define RAPPORTVITESSE  50*0.6          // Rapport de vitesse du moteur
 
 #define MAXPIDOUTPUT    10*1.3      // Valeur maximale du PID
-#define WHEELCIRCUM     2*pi*0.04   // Circonférence des roues
+#define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
 
 /*---------------------------- variables globales ---------------------------*/
 
@@ -240,20 +240,20 @@ void readMsg(){
 // Fonctions pour le PID
 double PIDmeasurement(){
   // To do
-  pulses = AX_.ENCODER_Read(0);
-  nb_turns = (pulses / PASPARTOUR ) * RAPPORTVITESSE;
+  int pulses = AX_.readEncoder(0);
+  float nb_turns = (pulses / PASPARTOUR ) * RAPPORTVITESSE;
 
-  distance_traveled = nb_turns * WHEELCIRCUM;
+  float distance_traveled = nb_turns * WHEELCIRCUM;
 
   return distance_traveled;
 }
 void PIDcommand(double cmd){
   // To do
   cmd = cmd / MAXPIDOUTPUT;
-  if (Cmd > 1.0) {
-    Cmd = 1.0;
-  } else if (Cmd < -1.0) {
-    Cmd = -1.0;
+  if (cmd > 1.0) {
+    cmd = 1.0;
+  } else if (cmd < -1.0) {
+    cmd = -1.0;
   }
 
   AX_.setMotorPWM(0,cmd);
@@ -261,5 +261,5 @@ void PIDcommand(double cmd){
 void PIDgoalReached(){
   // To do
   AX_.setMotorPWM(0,0);
-  AX_.ENCODER_Reset(0);
+  AX_.resetEncoder(0);
 }
