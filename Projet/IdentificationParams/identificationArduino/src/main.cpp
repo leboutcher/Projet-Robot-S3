@@ -181,10 +181,12 @@ void endPulse(){
 
 void startMag(){
   digitalWrite(MAGPIN, HIGH);
+  shouldMagOff_ = false;
 }
 
 void endMag(){
   digitalWrite(MAGPIN, LOW);
+  shouldMagOn_ = false;
 }
 
 void sendMsg(){
