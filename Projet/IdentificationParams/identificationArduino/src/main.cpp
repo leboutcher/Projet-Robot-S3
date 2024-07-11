@@ -38,8 +38,8 @@ volatile bool shouldPulse_ = false; // drapeau pour effectuer un pulse
 volatile bool shouldMagOn_ = false; // drapeau pour activer l'électro-aimant
 volatile bool shouldMagOff_ = false;// drapeau pour désactiver l'électro-aimant
 volatile bool isInPulse_ = false;   // drapeau pour effectuer un pulse
-volatile bool shouldSeq = false;    // drapeau pour commencer la séquence
-volatile bool shouldStopSeq = false;// drapeau pour arrêterla séquence
+volatile bool shouldStartSeq_ = false;    // drapeau pour commencer la séquence
+volatile bool shouldStopSeq_ = false;// drapeau pour arrêterla séquence
 
 SoftTimer timerSendMsg_;            // chronometre d'envoie de messages
 SoftTimer timerPulse_;              // chronometre pour la duree d'un pulse
@@ -248,6 +248,17 @@ void readMsg(){
   if(!parse_msg.isNull()){
     shouldMagOff_ = doc["magOff"];
   }
+
+  parse_msg = doc["seqOn"];
+    if(!parse_msg.isNull()){
+    shouldStartSeq_ = doc["seqOn"];
+  }
+  parse_msg = doc["seqOff"];
+    if(!parse_msg.isNull()){
+    shouldStopSeq_ = doc["seqOff"];
+  }
+
+
 }
 
 // Fonctions pour le PID
