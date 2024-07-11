@@ -81,6 +81,7 @@ void endMag();
 void sendMsg();
 void readMsg();
 void serialEvent();
+void sequence();
 
 // Fonctions pour le PID
 double PIDmeasurement();
@@ -180,12 +181,10 @@ void endPulse(){
 
 void startMag(){
   digitalWrite(MAGPIN, HIGH);
-  shouldMagOff_ = false;
 }
 
 void endMag(){
   digitalWrite(MAGPIN, LOW);
-  shouldMagOn_ = false;
 }
 
 void sendMsg(){
@@ -216,7 +215,6 @@ void sendMsg(){
   doc["distance"] = total_distance_traveled;
   energy+= abs(AX_.getCurrent()) * abs(AX_.getVoltage());
   doc["energie"] = energy;
-  doc["angle"] = computeAngle();
 
   // Serialisation
   serializeJson(doc, Serial);
@@ -290,7 +288,7 @@ void readMsg(){
 // Fonctions pour le PID
 double PIDmeasurement(){
   // To do
-  last_position = position
+  last_position = position;
   unsigned long pulses = AX_.readEncoder(0);
   float nb_turns = (pulses / PASPARTOUR ) * RAPPORTVITESSE;
   position = nb_turns * WHEELCIRCUM;
@@ -321,7 +319,7 @@ double computeAngle(){
   return (analogRead(POTPIN)-535)*4.55;
 }
 
-bool sequence()
+void sequence()
 {
   switch(deplacement)
   {
@@ -332,13 +330,13 @@ bool sequence()
     case FORWARD_05:
       pid_.setGoal(0.5);
       {
-        if(goalreached&&angle<12)
+        if(goalreached&&computeAngle()<12)
         {
           goalreached = false;
           deplacement = BACKWARD_03;
           break;
         }
-        if(goalreached&&angle>12)
+        if(goalreached&&computeAngle()>12)
         {
           goalreached = false;
           deplacement = FORWARD_BAC;
@@ -348,7 +346,7 @@ bool sequence()
     case HOME:
       pid_.setGoal(0);
       {
-        if(goalreached&&angle<=5)
+        if(goalreached&&computeAngle()<=5)
         {
           goalreached = false;
           //Electro-aimant ON
@@ -359,7 +357,7 @@ bool sequence()
     case STOP:
       pid_.setGoal(0);
       {
-        if(goalreached&&angle<=5)
+        if(goalreached&&computeAngle()<=5)
         {
           goalreached = false;
           //Electro-aimant ON
@@ -369,7 +367,7 @@ bool sequence()
     case FORWARD_BAC:
       pid_.setGoal(1.2);
       {
-        if (goalreached&&angle<=5)
+        if (goalreached&&computeAngle()<=5)
         {
           goalreached = false;
           //Electro-aimant off
