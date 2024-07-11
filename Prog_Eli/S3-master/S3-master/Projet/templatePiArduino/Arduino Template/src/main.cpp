@@ -22,8 +22,11 @@
 #define PASPARTOUR      64          // Nombre de pas par tour du moteur
 #define RAPPORTVITESSE  0.6/50          // Rapport de vitesse du moteur
 
-#define MAXPIDOUTPUT    10*1.3      // Valeur maximale du PID
-#define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
+#define kp              10          // Gain proportionnel du PID
+#define MAXPIDOUTPUT    kp*1.3      // Valeur maximale du PID
+#define WHEELCIRCUM     2*3.1416*0.08   // Circonférence des roues
+
+
 
 /*---------------------------- variables globales ---------------------------*/
 
@@ -52,6 +55,9 @@ float Axyz[3];                      // tableau pour accelerometre
 float Gxyz[3];                      // tableau pour giroscope
 float Mxyz[3];                      // tableau pour magnetometre
 
+int next_distance = 0; // Index of the next distance to reach
+float distance_values[6] = {0.5, 0.3, 1.3, 1.0, 1.3, 0.0}; 
+
 /*------------------------- Prototypes de fonctions -------------------------*/
 
 void timerCallback();
@@ -74,7 +80,7 @@ void setup() {
   //imu_.init();                      // initialisation de la centrale inertielle
   //vexEncoder_.init(2,3);            // initialisation de l'encodeur VEX
   // attache de l'interruption pour encodeur vex
-  attachInterrupt(vexEncoder_.getPinInt(), []{vexEncoder_.isr();}, FALLING);
+  //attachInterrupt(vexEncoder_.getPinInt(), []{vexEncoder_.isr();}, FALLING);
   
   // Chronometre envoie message
   timerSendMsg_.setDelay(UPDATE_PERIODE);
@@ -82,47 +88,24 @@ void setup() {
   timerSendMsg_.enable();
   
   // Initialisation du PID
-  pid_.setGains(10, 0.01 ,1);
+  pid_.setGains(kp, 0.01 ,1);     
   // Attache des fonctions de retour
   pid_.setMeasurementFunc(PIDmeasurement);
   pid_.setCommandFunc(PIDcommand);
   pid_.setAtGoalFunc(PIDgoalReached);
   pid_.setEpsilon(0.01);
   pid_.setPeriod(200);
-  pid_.setGoal(1);
   pid_.enable();
+  pinMode(MAGPIN, OUTPUT);
 
 }
   
 /* Boucle principale (infinie)*/
 void loop() {
-
-  // mise à jour du PID
+  digitalWrite(MAGPIN, HIGH);
+  delay(5000);
+  pid_.setGoal(1);
   pid_.run();
-  //Serial.println("PID");
-
-  /*RunForward_ = true;
-  bool RunForward_ = true;
-  Serial.print("RunForward: ");
-  Serial.println(RunForward_ ? "true" : "false");
-  runSequence();
-  stop_ = true;
-  runSequence();
-  RunReverse_ = true;
-  runSequence();
-  stop_ = true;
-  runSequence();
- /*if(shouldRead_){
-    readMsg();
-  }
-  if(shouldSend_){
-    sendMsg();
-  }
-  
-
-  // mise a jour des chronometres
-  timerSendMsg_.update();
-  timerPulse_.update();*/
 }
 
 /*---------------------------Definition de fonctions ------------------------*/
@@ -287,5 +270,6 @@ void PIDcommand(double cmd){
 void PIDgoalReached(){
   // To do
   AX_.setMotorPWM(0,0);
-  AX_.resetEncoder(0);
+  //AX_.resetEncoder(0);
+  next_distance++;
 }
