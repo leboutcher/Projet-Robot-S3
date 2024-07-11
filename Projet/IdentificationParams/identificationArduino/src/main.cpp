@@ -22,7 +22,7 @@
 
 #define kp              15
 #define MAXPIDOUTPUT    kp*1.3         // Valeur maximale du PID
-#define WHEELCIRCUM     2*3.1416*0.04  // Circonférence des roues
+#define WHEELCIRCUM     2*3.1416*0.08  // Circonférence des roues
 
 #define POTMAXOUTPUT    1024           // Valeur maximale de lecture du potentiomètre
 #define POTMAXANGLE     255            // Valeur maximal d'angle du potentiomètre
