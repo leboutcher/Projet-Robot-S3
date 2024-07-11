@@ -11,18 +11,21 @@
 #include <libExample.h> // Vos propres librairies
 /*------------------------------ Constantes ---------------------------------*/
 
-#define BAUD            115200      // Frequence de transmission serielle
-#define UPDATE_PERIODE  100         // Periode (ms) d'envoie d'etat general
+#define BAUD            115200         // Frequence de transmission serielle
+#define UPDATE_PERIODE  100            // Periode (ms) d'envoie d'etat general
 
-#define MAGPIN          32          // Port numerique pour electroaimant
-#define POTPIN          A5          // Port analogique pour le potentiometre
+#define MAGPIN          32             // Port numerique pour electroaimant
+#define POTPIN          A5             // Port analogique pour le potentiometre
 
-#define PASPARTOUR      64*50       // Nombre de pas par tour du moteur
-#define RAPPORTVITESSE  0.6    // Rapport de vitesse du moteur
+#define PASPARTOUR      64*50          // Nombre de pas par tour du moteur
+#define RAPPORTVITESSE  0.6            // Rapport de vitesse du moteur
 
 #define kp              15
-#define MAXPIDOUTPUT    kp*1.3      // Valeur maximale du PID
-#define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
+#define MAXPIDOUTPUT    kp*1.3         // Valeur maximale du PID
+#define WHEELCIRCUM     2*3.1416*0.04  // Circonférence des roues
+
+#define POTMAXOUTPUT    1024           // Valeur maximale de lecture du potentiomètre
+#define POTMAXANGLE     255            // Valeur maximal d'angle du potentiomètre
 
 /*---------------------------- variables globales ---------------------------*/
 
@@ -70,6 +73,8 @@ void serialEvent();
 double PIDmeasurement();
 void PIDcommand(double cmd);
 void PIDgoalReached();
+
+double computeAngle();
 
 /*---------------------------- fonctions "Main" -----------------------------*/
 
@@ -291,4 +296,8 @@ void PIDgoalReached(){
   //pid_.setGoal(0);
   AX_.setMotorPWM(0,0);
   //AX_.resetEncoder(0);
+}
+
+double computeAngle(){
+  return analogRead(POTPIN)/POTMAXOUTPUT * POTMAXANGLE;
 }
