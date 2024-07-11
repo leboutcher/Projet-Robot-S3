@@ -11,18 +11,18 @@
 //#include <libExample.h> // Vos propres librairies
 /*------------------------------ Constantes ---------------------------------*/
 
-#define BAUD            115200      // Frequence de transmission serielle
-#define UPDATE_PERIODE  100         // Periode (ms) d'envoie d'etat general
+#define BAUD            115200         // Frequence de transmission serielle
+#define UPDATE_PERIODE  100            // Periode (ms) d'envoie d'etat general
 
-#define MAGPIN          32          // Port numerique pour electroaimant
-#define POTPIN          A5          // Port analogique pour le potentiometre
+#define MAGPIN          32             // Port numerique pour electroaimant
+#define POTPIN          A5             // Port analogique pour le potentiometre
 
-#define PASPARTOUR      64*50       // Nombre de pas par tour du moteur
-#define RAPPORTVITESSE  0.6    // Rapport de vitesse du moteur
+#define PASPARTOUR      64*50          // Nombre de pas par tour du moteur
+#define RAPPORTVITESSE  0.6            // Rapport de vitesse du moteur
 
 #define kp              15
-#define MAXPIDOUTPUT    kp*1.3      // Valeur maximale du PID
-#define WHEELCIRCUM     2*3.1416*0.04   // Circonférence des roues
+#define MAXPIDOUTPUT    kp*1.3         // Valeur maximale du PID
+#define WHEELCIRCUM     2*3.1416*0.08  // Circonférence des roues
 
 /*---------------------------- variables globales ---------------------------*/
 
@@ -85,6 +85,8 @@ void serialEvent();
 double PIDmeasurement();
 void PIDcommand(double cmd);
 void PIDgoalReached();
+
+double computeAngle();
 
 /*---------------------------- fonctions "Main" -----------------------------*/
 
@@ -175,11 +177,11 @@ void endPulse(){
 }
 
 void startMag(){
-  pinMode(MAGPIN, HIGH);
+  digitalWrite(MAGPIN, HIGH);
 }
 
 void endMag(){
-  pinMode(MAGPIN, LOW);
+  digitalWrite(MAGPIN, LOW);
 }
 
 void sendMsg(){
@@ -310,6 +312,10 @@ void PIDgoalReached(){
   AX_.setMotorPWM(0,0);
   //AX_.resetEncoder(0);
   goalreached = true;
+}
+
+double computeAngle(){
+  return (analogRead(POTPIN)-535)*4.55;
 }
 
 bool sequence()
