@@ -8,7 +8,7 @@
 /*------------------------------ Librairies ---------------------------------*/
 #include <LibS3GRO.h>
 #include <ArduinoJson.h>
-#include <libExample.h> // Vos propres librairies
+//#include <libExample.h> // Vos propres librairies
 /*------------------------------ Constantes ---------------------------------*/
 
 #define BAUD            115200         // Frequence de transmission serielle
@@ -54,6 +54,21 @@ float Mxyz[3];                      // tableau pour magnetometre
 double total_distance_traveled;     // variable qui garde la distance totale parcourue
 double current_position;            // variable qui garde la position actuelle du robot
 double energy;                  // variable qui garde la puissance totale consommée
+
+bool goalreached = false;           // variable pour indiquer si l'objectif est atteint
+
+// Enumération pour les différentes séquences
+enum deplacement
+{
+  START,
+  FORWARD_05,
+  FORWARD_BAC,
+  BACKWARD_03,
+  HOME,
+  STOP
+} deplacement;
+bool DONE = false;
+
 
 /*------------------------- Prototypes de fonctions -------------------------*/
 
@@ -109,7 +124,7 @@ void setup() {
 
 /* Boucle principale (infinie)*/
 void loop() {
-
+  
   if(shouldRead_){
     readMsg();
   }
@@ -125,7 +140,9 @@ void loop() {
   if(shouldMagOff_){
     endMag();
   }
-
+  if(shouldStartSeq_){
+    sequence();
+  }
   // mise a jour des chronometres
   timerSendMsg_.update();
   timerPulse_.update();
@@ -253,11 +270,11 @@ void readMsg(){
 
   parse_msg = doc["seqOn"];
     if(!parse_msg.isNull()){
-    shouldStartSeq_ = doc["seqOn"];
+    shouldStartSeq_ = true;
   }
   parse_msg = doc["seqOff"];
     if(!parse_msg.isNull()){
-    shouldStopSeq_ = doc["seqOff"];
+    shouldStopSeq_ = false;
   }
 
 
@@ -288,13 +305,73 @@ void PIDcommand(double cmd){
 
   AX_.setMotorPWM(0,cmd);
 }
+
 void PIDgoalReached(){
   // To do
   //pid_.setGoal(0);
   AX_.setMotorPWM(0,0);
   //AX_.resetEncoder(0);
+  goalreached = true;
 }
 
 double computeAngle(){
   return (analogRead(POTPIN)-535)*4.55;
+}
+
+bool sequence()
+{
+  switch(deplacement)
+  {
+    case START:
+      // Début de la séquence
+      deplacement = FORWARD_05;
+      break;
+    case FORWARD_05:
+      pid_.setGoal(0.5);
+      {
+        if(goalreached&&angle<12)
+        {
+          goalreached = false;
+          deplacement = BACKWARD_03;
+          break;
+        }
+        if(goalreached&&angle>12)
+        {
+          goalreached = false;
+          deplacement = FORWARD_BAC;
+          break;
+        }
+      }
+    case HOME:
+      pid_.setGoal(0);
+      {
+        if(goalreached&&angle<=5)
+        {
+          goalreached = false;
+          //Electro-aimant ON
+          deplacement = STOP;
+        }
+      }
+
+    case STOP:
+      pid_.setGoal(0);
+      {
+        if(goalreached&&angle<=5)
+        {
+          goalreached = false;
+          //Electro-aimant ON
+          deplacement = FORWARD_05;
+        }
+      }
+    case FORWARD_BAC:
+      pid_.setGoal(1.2);
+      {
+        if (goalreached&&angle<=5)
+        {
+          goalreached = false;
+          //Electro-aimant off
+          deplacement = HOME;
+        }
+      } 
+  }
 }
