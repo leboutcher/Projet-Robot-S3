@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
 MainWindow::MainWindow(int updateRate, QWidget *parent):
     QMainWindow(parent)
 {
@@ -8,10 +9,21 @@ MainWindow::MainWindow(int updateRate, QWidget *parent):
     // Initialisation du UI
     ui = new Ui::MainWindow;
     ui->setupUi(this);
+    ui->lcdDistance->setDigitCount(4);
+    ui->lcdEnergie->setDigitCount(4);
+    ui->lcdAngle->setDigitCount(4);
+
+
+
+    // Set segment style to Flat for all QLCDNumber widgets
+    ui->lcdDistance->setSegmentStyle(QLCDNumber::Flat);
+    ui->lcdAngle->setSegmentStyle(QLCDNumber::Flat);
+    ui->lcdEnergie->setSegmentStyle(QLCDNumber::Flat);
+
 
     // Initialisation du graphique
     ui->graph->setChart(&chart_);
-    chart_.setTitle("Donnees brutes");
+    chart_.setTitle("Position du robot");
     chart_.legend()->hide();
     chart_.addSeries(&series_);
 
@@ -62,13 +74,49 @@ void MainWindow::receiveFromSerial(QString msg){
             ui->textBrowser->setText(buff.mid(2,buff.length()-4));
 
             // Affichage des donnees dans le graph
-            if(jsonObj.contains(JsonKey_)){
+            /*if(jsonObj.contains(JsonKey_)){
                 double time = jsonObj["time"].toDouble();
                 series_.append(time, jsonObj[JsonKey_].toDouble());
                 // Mise en forme du graphique (non optimal)
                 chart_.removeSeries(&series_);
                 chart_.addSeries(&series_);
                 chart_.createDefaultAxes();
+            }
+            */
+            if (jsonObj.contains("distance")) {
+                double distance = jsonObj["distance"].toDouble();
+
+                // Mettre à jour le QLCDNumber
+                ui->lcdDistance->display(static_cast<int>(distance));
+            }
+
+            if (jsonObj.contains("angle")) {
+                double angle = jsonObj["angle"].toDouble();
+
+                // Mettre à jour le QLCDNumber
+                ui->lcdAngle->display(static_cast<int>(angle));
+            }
+
+            if (jsonObj.contains("energie")) {
+                double energie = jsonObj["energie"].toDouble();
+
+                // Mettre à jour le QLCDNumber
+                ui->lcdEnergie->display(static_cast<int>(energie));
+            }
+
+            if (jsonObj.contains("position")) {
+               double time = jsonObj["time"].toDouble();
+               double position = jsonObj["position"].toDouble();
+
+               time = time/1000;
+
+               // Ajouter les données au QLineSeries pour le graphique
+               series_.append(time, position);
+
+               // Mettre à jour le graphique
+               chart_.removeSeries(&series_);
+               chart_.addSeries(&series_);
+               chart_.createDefaultAxes();
             }
 
             // Fonction de reception de message (vide pour l'instant)
@@ -101,9 +149,11 @@ void MainWindow::connectButtons(){
     connect(ui->pulseButton, SIGNAL(clicked()), this, SLOT(sendPulseStart()));
     connect(ui->checkBox, SIGNAL(stateChanged(int)), this, SLOT(manageRecording(int)));
     connect(ui->pushButton_Params, SIGNAL(clicked()), this, SLOT(sendPID()));
-    // emant
+    // aimant
     connect(ui->onMagButton, SIGNAL(clicked()), this, SLOT(onMagButtonClicked()));
     connect(ui->offMagButton, SIGNAL(clicked()), this, SLOT(offMagButtonClicked()));
+    connect(ui->onSequence, SIGNAL(clicked()), this, SLOT(onSequenceClicked()));
+    connect(ui->offSequence, SIGNAL(clicked()), this, SLOT(offSequenceClicked()));
 }
 
 void MainWindow::connectSpinBoxes(){
@@ -244,16 +294,7 @@ void MainWindow::onPeriodicUpdate(){
 
 
 void MainWindow::onMagButtonClicked() {
-    // Commenter au besoin
-    //qDebug().noquote() <<"Bouton lumière";
 
-    /*
-     * Étape 5. Créer un objet QJsonObject contenant la paire: "turnOnLight" et la durée d'allumage en secondes.
-     * Décommenter le reste des lignes de la fonction ensuite. Ces lignes se chargent de formater
-     * le message et de le transmettre par le port série.
-    */
-    // TODO...
-    
     QJsonObject jsonObject
     {
         {"magOn", 1}
@@ -269,21 +310,45 @@ void MainWindow::onMagButtonClicked() {
     sendMessage(strJson);
 }
 void MainWindow::offMagButtonClicked() {
-    // Commenter au besoin
-    //qDebug().noquote() <<"Bouton lumière";
 
-    /*
-     * Étape 5. Créer un objet QJsonObject contenant la paire: "turnOnLight" et la durée d'allumage en secondes.
-     * Décommenter le reste des lignes de la fonction ensuite. Ces lignes se chargent de formater
-     * le message et de le transmettre par le port série.
-    */
-    // TODO...
-    
     QJsonObject jsonObject
     {
         {"magOff", 1}
     };
     
+    // Formatage en document JSON
+    QJsonDocument doc(jsonObject);
+
+     //Casting en type QString
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    // Envoi du message
+    sendMessage(strJson);
+}
+
+void MainWindow::onSequenceClicked(){
+
+    QJsonObject jsonObject
+    {
+        {"sequOn", 1}
+    };
+    // Formatage en document JSON
+    QJsonDocument doc(jsonObject);
+
+     //Casting en type QString
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    // Envoi du message
+    sendMessage(strJson);
+}
+
+void MainWindow::offSequenceClicked(){
+
+    QJsonObject jsonObject
+    {
+        {"sequOff", 1}
+    };
+
     // Formatage en document JSON
     QJsonDocument doc(jsonObject);
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>752</width>
-    <height>578</height>
+    <height>724</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -18,26 +18,16 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="6" column="0" colspan="2">
-     <widget class="QLabel" name="label_pathCSV">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::AutoText</enum>
-      </property>
-     </widget>
+    <item row="23" column="1">
+     <widget class="QLCDNumber" name="lcdDistance"/>
     </item>
-    <item row="7" column="6">
-     <widget class="QLineEdit" name="lineEdit_Kp"/>
+    <item row="8" column="6">
+     <widget class="QLineEdit" name="lineEdit_Ki"/>
     </item>
-    <item row="9" column="5">
-     <widget class="QLabel" name="label_10">
+    <item row="13" column="5">
+     <widget class="QLabel" name="label_11">
       <property name="text">
-       <string>Valeur Kd</string>
+       <string>Seuil</string>
       </property>
      </widget>
     </item>
@@ -48,22 +38,42 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="4" rowspan="13">
-     <widget class="Line" name="line_3">
+    <item row="0" column="1">
+     <widget class="QComboBox" name="comboBoxPort"/>
+    </item>
+    <item row="18" column="2">
+     <widget class="Line" name="line">
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
-    <item row="15" column="1">
-     <widget class="QLineEdit" name="JsonKey">
+    <item row="18" column="5" colspan="2">
+     <widget class="QPushButton" name="pushButton_Params">
       <property name="text">
-       <string>potVex</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <string>Envoie Parametres</string>
       </property>
      </widget>
+    </item>
+    <item row="23" column="0">
+     <widget class="QLabel" name="label_12">
+      <property name="text">
+       <string>Distance parcourue</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="3">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Messages Json de l'Arduino:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="13" column="6">
+     <widget class="QLineEdit" name="lineEdit_Thresh"/>
     </item>
     <item row="8" column="0">
      <widget class="QLabel" name="label_2">
@@ -72,10 +82,30 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="0">
-     <widget class="QLabel" name="label">
+    <item row="6" column="6">
+     <widget class="QLineEdit" name="lineEdit_DesVal"/>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_5">
       <property name="text">
-       <string>Tension [-1,1]</string>
+       <string>Port:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0" colspan="2">
+     <widget class="QCheckBox" name="checkBox">
+      <property name="text">
+       <string>Enregistrement des donnees sous:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="5" colspan="2">
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>Execice PID</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
@@ -92,54 +122,24 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="5">
-     <widget class="QLabel" name="label_8">
+    <item row="7" column="0">
+     <widget class="QLabel" name="label">
       <property name="text">
-       <string>Valeur Kp</string>
+       <string>Tension [-1,1]</string>
       </property>
      </widget>
     </item>
-    <item row="15" column="0">
-     <widget class="QLabel" name="label_3">
+    <item row="9" column="0" colspan="2">
+     <widget class="QPushButton" name="pulseButton">
       <property name="text">
-       <string>Donnees brutes:</string>
+       <string>Commande de pulse</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="3">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Messages Json de l'Arduino:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-      </property>
-     </widget>
+    <item row="21" column="1">
+     <widget class="QLCDNumber" name="lcdEnergie"/>
     </item>
-    <item row="14" column="2">
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="6">
-     <widget class="QLineEdit" name="lineEdit_Kd"/>
-    </item>
-    <item row="8" column="6">
-     <widget class="QLineEdit" name="lineEdit_Ki"/>
-    </item>
-    <item row="4" column="5" colspan="2">
-     <widget class="QLabel" name="label_6">
-      <property name="text">
-       <string>Execice PID</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="3" rowspan="11">
+    <item row="5" column="3" rowspan="20">
      <widget class="QTextBrowser" name="textBrowser">
       <property name="font">
        <font>
@@ -148,29 +148,15 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="5">
-     <widget class="QLabel" name="label_7">
+    <item row="13" column="1">
+     <widget class="QPushButton" name="offSequence">
       <property name="text">
-       <string>Val. desiree</string>
+       <string>Arreter</string>
       </property>
      </widget>
     </item>
-    <item row="5" column="0" colspan="2">
-     <widget class="QCheckBox" name="checkBox">
-      <property name="text">
-       <string>Enregistrement des donnees sous:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="10" column="5">
-     <widget class="QLabel" name="label_11">
-      <property name="text">
-       <string>Seuil</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="6">
-     <widget class="QLineEdit" name="lineEdit_DesVal"/>
+    <item row="26" column="0" colspan="4">
+     <widget class="QChartView" name="graph"/>
     </item>
     <item row="8" column="1">
      <widget class="QSpinBox" name="DurationBox">
@@ -188,33 +174,105 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>Port:</string>
+    <item row="4" column="4" rowspan="23">
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
      </widget>
     </item>
-    <item row="16" column="0" colspan="4">
-     <widget class="QChartView" name="graph"/>
+    <item row="9" column="6">
+     <widget class="QLineEdit" name="lineEdit_Kd"/>
     </item>
-    <item row="9" column="0" colspan="2">
-     <widget class="QPushButton" name="pulseButton">
+    <item row="21" column="0">
+     <widget class="QLabel" name="label_13">
       <property name="text">
-       <string>Commande de pulse</string>
+       <string>Énergie Consommée</string>
       </property>
      </widget>
     </item>
-    <item row="10" column="6">
-     <widget class="QLineEdit" name="lineEdit_Thresh"/>
-    </item>
-    <item row="4" column="1">
-     <widget class="QComboBox" name="comboBoxPort"/>
-    </item>
-    <item row="14" column="5" colspan="2">
-     <widget class="QPushButton" name="pushButton_Params">
+    <item row="7" column="5">
+     <widget class="QLabel" name="label_8">
       <property name="text">
-       <string>Envoie Parametres</string>
+       <string>Valeur Kp</string>
+      </property>
+     </widget>
+    </item>
+    <item row="24" column="0">
+     <widget class="QLabel" name="label_14">
+      <property name="text">
+       <string>Angle du pendule</string>
+      </property>
+     </widget>
+    </item>
+    <item row="13" column="0">
+     <widget class="QPushButton" name="onSequence">
+      <property name="text">
+       <string>Démarrer</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="2">
+     <widget class="QLabel" name="label_pathCSV">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::AutoText</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="5">
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>Valeur Kd</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="5">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>Val. desiree</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="6">
+     <widget class="QLineEdit" name="lineEdit_Kp"/>
+    </item>
+    <item row="18" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Donnees brutes:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="24" column="1">
+     <widget class="QLCDNumber" name="lcdAngle"/>
+    </item>
+    <item row="18" column="1">
+     <widget class="QLineEdit" name="JsonKey">
+      <property name="text">
+       <string>potVex</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0">
+     <widget class="QPushButton" name="onMagButton">
+      <property name="text">
+       <string>Aimant On</string>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="1">
+     <widget class="QPushButton" name="offMagButton">
+      <property name="text">
+       <string>Aimant Off</string>
       </property>
      </widget>
     </item>

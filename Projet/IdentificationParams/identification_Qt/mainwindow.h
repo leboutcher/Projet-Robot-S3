@@ -9,6 +9,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QSerialPortInfo>
+#include <QLCDNumber>
+#include <QApplication>
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -51,6 +53,8 @@ private slots:
     void sendPID();
     void onMagButtonClicked();
     void offMagButtonClicked();
+    void onSequenceClicked();
+    void offSequenceClicked();
 
 private:
     void connectTimers(int updateRate);
