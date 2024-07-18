@@ -17,12 +17,12 @@
 #define MAGPIN          32             // Port numerique pour electroaimant
 #define POTPIN          A5             // Port analogique pour le potentiometre
  
-#define PASPARTOUR      64*50          // Nombre de pas par tour du moteur
+#define PASPARTOUR      64.0*50.0          // Nombre de pas par tour du moteur
 #define RAPPORTVITESSE  0.6            // Rapport de vitesse du moteur
  
-#define kp              15
-#define MAXPIDOUTPUT    kp*1.3         // Valeur maximale du PID
-#define WHEELCIRCUM     2*3.1416*0.08  // Circonférence des roues
+#define kp              100
+#define MAXPIDOUTPUT    1         // Valeur maximale du PID
+#define WHEELCIRCUM     2*3.1416*0.04  // Circonférence des roues
  
 /*---------------------------- variables globales ---------------------------*/
  
@@ -53,8 +53,8 @@ float Gxyz[3];                      // tableau pour giroscope
 float Mxyz[3];                      // tableau pour magnetometre
 double total_distance_traveled;     // variable qui garde la distance totale parcourue
 double energy;                      // variable qui garde la puissance totale consommée
-float position;                    // variable qui garde la position courante du robot
-float last_position;                // variable qui garde la dernière position
+double position;                    // variable qui garde la position courante du robot
+double last_position;                // variable qui garde la dernière position
 bool goalreached = false;           // variable pour indiquer si l'objectif est atteint
 bool movementComplete = false;     // variable pour indiquer si le mouvement est complet
 bool firstRun = true;              // variable pour indiquer si c'est la première fois que la séquence est appelée
@@ -65,7 +65,7 @@ enum deplacement
 {
   START = 0,
   FORWARD_05 = 1,
-  FORWARD_BAC = 2,
+  FORWRAD_BOX = 2,
   BACKWARD_03 = 3,
   HOME = 4,
   STOP = 5,
@@ -84,7 +84,7 @@ void readMsg();
 void serialEvent();
 void sequence();
 void FORWARD05f();
-void FORWARD_BACf();
+void FORWRAD_BOXf();
 void HOMEf();
 void STOPf();
 void BACKWARD03f();
@@ -122,12 +122,12 @@ void setup() {
   timerPulse_.setCallback(endPulse);
  
   // Initialisation du PID
-  pid_.setGains(kp, 1.118 , 0.05);
+  pid_.setGains(kp, 1 , 1);
   // Attache des fonctions de retour
   pid_.setMeasurementFunc(PIDmeasurement);
   pid_.setCommandFunc(PIDcommand);
   pid_.setAtGoalFunc(PIDgoalReached);
-  pid_.setEpsilon(0.05);
+  pid_.setEpsilon(0.02);
   pid_.setPeriod(100);
   pid_.enable();
   deplacement = START;
@@ -135,19 +135,16 @@ void setup() {
  
 /* Boucle principale (infinie)*/
 void loop() {
-  //Serial.print("deplacement: ");
-  //Serial.println(deplacement);
+
   if (!enablePID) {
     pid_.enable();
     enablePID = true;
-    Serial.println("PID enabled");
+    //Serial.println("PID enabled");
   }
  
   sequence();
  
-  Serial.print("deplacement: ");
-  Serial.println(deplacement);
-  if(shouldRead_){
+  /*if(shouldRead_){
     readMsg();
   }
   if(shouldSend_){
@@ -167,7 +164,10 @@ void loop() {
   }
   // mise a jour des chronometres
   timerSendMsg_.update();
-  timerPulse_.update();
+  timerPulse_.update();*/
+  //computeAngle();
+  //run pid
+  pid_.run();
 }
  
 /*---------------------------Definition de fonctions ------------------------*/
@@ -307,13 +307,19 @@ void readMsg(){
 double PIDmeasurement(){
  
   last_position = position;
- unsigned long pulses = AX_.readEncoder(0);
+ long pulses = AX_.readEncoder(0);
+
+ //Serial.print("Pulses: ");
+ //Serial.println(pulses);
  
-  float nb_turns = (pulses/(PASPARTOUR) )*0.6;
+ double  nb_turns = (pulses/(PASPARTOUR) )*0.6;
+
+ //Serial.print("nb_turns: ");
+  //Serial.println(nb_turns);
  
   position = nb_turns * WHEELCIRCUM;
-  Serial.print ("Position: ");
-  Serial.println(position);
+  //Serial.print ("Position: ");
+  //Serial.println(position);
   return position;
 }
  
@@ -330,14 +336,16 @@ void PIDcommand(double cmd){
 }
  
 void PIDgoalReached(){
-  AX_.setMotorPWM(0,0);
+  //AX_.setMotorPWM(0,0);
   goalreached = true;
   Serial.println("Goal reached");
   enablePID = false;
 }
  
 double computeAngle(){
-  return (analogRead(POTPIN)-535)*4.55;
+  Serial.print("Angle: ");
+  Serial.println((analogRead(POTPIN)-535)/4.55);
+  return (analogRead(POTPIN)-535)/4.55;
 }
  
 void sequence() {
@@ -347,23 +355,23 @@ void sequence() {
             break;
         case FORWARD_05:
             FORWARD05f();
-            Serial.println("Forward 0.5");
+            //Serial.println("Forward 0.5");
             break;
-        case FORWARD_BAC:
-            FORWARD_BACf();
-            Serial.println("Forward 1.2");
+        case FORWRAD_BOX:
+            FORWRAD_BOXf();
+            //Serial.println("Forward 1.2");
             break;
         case HOME:
             HOMEf();
-            Serial.println("Home");
+            //Serial.println("Home");
             break;
         case STOP:
             STOPf();
-            Serial.println("Stop");
+            //Serial.println("Stop");
             break;
         case BACKWARD_03:
             BACKWARD03f();
-            Serial.println("Backward 0.3");
+            //Serial.println("Backward 0.3");
             break;
     }
 }
@@ -371,31 +379,32 @@ void sequence() {
 // State machine functions
 void FORWARD05f() {
   pid_.setGoal(0.5);
-  pid_.run();
+  //pid_.run();
  
   // Check if the goal has been reached
   if (goalreached) {
-    if (computeAngle() > -12) {
+    if (computeAngle() > -18) {
       goalreached = false;
-      Serial.println("Je suis dans le if 1");
+      //Serial.println("Je suis dans le if 1");
+
       deplacement = BACKWARD_03; // Set movement to backward
     }
-    else if (computeAngle() <= -12) {
+    else if (computeAngle() <= -18) {
       goalreached = false;
-      Serial.println("Je suis dans le if 2");
-      deplacement = FORWARD_BAC; // Set movement to forward
+      //Serial.println("Je suis dans le if 2");
+      deplacement = FORWRAD_BOX; // Set movement to forward
     }
   }
 }
  
-void FORWARD_BACf() {
+void FORWRAD_BOXf() {
   pid_.setGoal(1.2);
   pid_.run();
   if (goalreached) {
       if (computeAngle() <= 5)
       {
         goalreached = false;
-        // Electro-aimant off
+        digitalWrite(MAGPIN, LOW);
         deplacement = HOME;
       }
   }
@@ -406,8 +415,10 @@ void HOMEf() {
 if (goalreached) {
       if (computeAngle() <= 5)
       {
+        //millis
         goalreached = false;
-        // Electro-aimant off
+        digitalWrite(MAGPIN, HIGH);
+        //Voir si reset encoders
         deplacement = STOP;
       }
   }
@@ -423,7 +434,7 @@ void STOPf() {
 }
  
 void BACKWARD03f() {
-  pid_.setGoal(0.3);
+  pid_.setGoal(0.40);
   pid_.run();
   if (goalreached) {
     goalreached = false;
