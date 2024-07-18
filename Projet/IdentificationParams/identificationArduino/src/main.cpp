@@ -39,7 +39,6 @@ volatile bool shouldMagOn_ = false; // drapeau pour activer l'électro-aimant
 volatile bool shouldMagOff_ = false;// drapeau pour désactiver l'électro-aimant
 volatile bool isInPulse_ = false;   // drapeau pour effectuer un pulse
 volatile bool shouldStartSeq_ = false;    // drapeau pour commencer la séquence
-volatile bool shouldStopSeq_ = false;// drapeau pour arrêterla séquence
  
 SoftTimer timerSendMsg_;            // chronometre d'envoie de messages
 SoftTimer timerPulse_;              // chronometre pour la duree d'un pulse
@@ -141,15 +140,19 @@ void loop() {
     enablePID = true;
     //Serial.println("PID enabled");
   }
- 
   sequence();
  
-  /*if(shouldRead_){
+  //sequence();
+  if(shouldRead_){
     readMsg();
   }
   if(shouldSend_){
     sendMsg();
   }
+  //Serial.println(shouldStartSeq_);
+  //if(shouldStartSeq_){
+  //  sequence();
+  //}
   if(shouldPulse_){
     startPulse();
   }
@@ -159,12 +162,9 @@ void loop() {
   if(shouldMagOff_){
     endMag();
   }
-  if(shouldStartSeq_){
-    sequence();
-  }
   // mise a jour des chronometres
   timerSendMsg_.update();
-  timerPulse_.update();*/
+  timerPulse_.update();
   //computeAngle();
   //run pid
   pid_.run();
@@ -215,15 +215,15 @@ void sendMsg(){
   doc["measurements"] = PIDmeasurement();
   doc["voltage"] = AX_.getVoltage();
   doc["current"] = AX_.getCurrent();
-  doc["pulsePWM"] = pulsePWM_;
-  doc["pulseTime"] = pulseTime_;
-  doc["inPulse"] = isInPulse_;
-  doc["accelX"] = imu_.getAccelX();
-  doc["accelY"] = imu_.getAccelY();
-  doc["accelZ"] = imu_.getAccelZ();
-  doc["gyroX"] = imu_.getGyroX();
-  doc["gyroY"] = imu_.getGyroY();
-  doc["gyroZ"] = imu_.getGyroZ();
+  //doc["pulsePWM"] = pulsePWM_;
+  //doc["pulseTime"] = pulseTime_;
+  doc["inPulse"] = shouldStartSeq_;
+  //doc["accelX"] = imu_.getAccelX();
+  //doc["accelY"] = imu_.getAccelY();
+  //doc["accelZ"] = imu_.getAccelZ();
+  //doc["gyroX"] = imu_.getGyroX();
+  //doc["gyroY"] = imu_.getGyroY();
+  //doc["gyroZ"] = imu_.getGyroZ();
   doc["isGoal"] = pid_.isAtGoal();
   doc["actualTime"] = pid_.getActualDt();
   doc["position"] = position;
@@ -231,6 +231,7 @@ void sendMsg(){
   doc["distance"] = total_distance_traveled;
   energy+= abs(AX_.getCurrent()) * abs(AX_.getVoltage());
   doc["energie"] = energy;
+  doc["angle"] = computeAngle();
  
   // Serialisation
   serializeJson(doc, Serial);
@@ -281,23 +282,25 @@ void readMsg(){
  
   parse_msg = doc["magOn"];
   if(!parse_msg.isNull()){
-    shouldMagOn_ = doc["magOn"];
+    shouldMagOn_ = true;
     shouldMagOff_ = false;
   }
  
   parse_msg = doc["magOff"];
   if(!parse_msg.isNull()){
-    shouldMagOff_ = doc["magOff"];
+    shouldMagOff_ = true;
     shouldMagOn_ = false;
   }
  
   parse_msg = doc["seqOn"];
     if(!parse_msg.isNull()){
-    shouldStartSeq_ = true;
+      if(doc["seqOn"])
+        shouldStartSeq_ = true;
   }
   parse_msg = doc["seqOff"];
     if(!parse_msg.isNull()){
-    shouldStopSeq_ = false;
+      if(doc["seqOff"])
+        shouldStartSeq_ = false;
   }
  
  
@@ -343,8 +346,8 @@ void PIDgoalReached(){
 }
  
 double computeAngle(){
-  Serial.print("Angle: ");
-  Serial.println((analogRead(POTPIN)-535)/4.55);
+  //Serial.print("Angle: ");
+  //Serial.println((analogRead(POTPIN)-535)/4.55);
   return (analogRead(POTPIN)-535)/4.55;
 }
  
@@ -399,7 +402,7 @@ void FORWARD05f() {
  
 void FORWRAD_BOXf() {
   pid_.setGoal(1.2);
-  pid_.run();
+  //pid_.run();
   if (goalreached) {
       if (computeAngle() <= 5)
       {
@@ -411,7 +414,7 @@ void FORWRAD_BOXf() {
 }
 void HOMEf() {
   pid_.setGoal(0);
-  pid_.run();
+  //pid_.run();
 if (goalreached) {
       if (computeAngle() <= 5)
       {
@@ -426,7 +429,7 @@ if (goalreached) {
  
 void STOPf() {
   pid_.setGoal(0);
-  pid_.run();
+  //pid_.run();
   if (goalreached) {
     goalreached = false;
     deplacement = FORWARD_05;
@@ -435,7 +438,7 @@ void STOPf() {
  
 void BACKWARD03f() {
   pid_.setGoal(0.40);
-  pid_.run();
+  //pid_.run();
   if (goalreached) {
     goalreached = false;
     deplacement = FORWARD_05;
