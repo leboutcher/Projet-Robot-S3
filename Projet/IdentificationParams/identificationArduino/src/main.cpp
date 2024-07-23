@@ -208,23 +208,10 @@ void sendMsg(){
   StaticJsonDocument<500> doc;
   // Elements du message
  
-  //doc["time"] = millis();
   doc["potVex"] = analogRead(POTPIN);
-  //doc["encVex"] = vexEncoder_.getCount();
   doc["goal"] = pid_.getGoal();
   doc["measurements"] = PIDmeasurement();
-  //doc["voltage"] = AX_.getVoltage();
-  //doc["current"] = AX_.getCurrent();
-  //doc["pulsePWM"] = pulsePWM_;
-  //doc["pulseTime"] = pulseTime_;
   doc["inPulse"] = shouldStartSeq_;
-  //doc["accelX"] = imu_.getAccelX();
-  //doc["accelY"] = imu_.getAccelY();
-  //doc["accelZ"] = imu_.getAccelZ();
-  //doc["gyroX"] = imu_.getGyroX();
-  //doc["gyroY"] = imu_.getGyroY();
-  //doc["gyroZ"] = imu_.getGyroZ();
-  //doc["isGoal"] = pid_.isAtGoal();
   doc["actualTime"] = pid_.getActualDt();
   doc["position"] = position;
   total_distance_traveled += abs(position - last_position);
@@ -321,18 +308,11 @@ double PIDmeasurement(){
  
   last_position = position;
  long pulses = AX_.readEncoder(0);
-
- //Serial.print("Pulses: ");
- //Serial.println(pulses);
  
  double  nb_turns = (pulses/(PASPARTOUR) )*0.6;
 
- //Serial.print("nb_turns: ");
-  //Serial.println(nb_turns);
  
   position = nb_turns * WHEELCIRCUM;
-  //Serial.print ("Position: ");
-  //Serial.println(position);
   return position;
 }
  
@@ -349,15 +329,11 @@ void PIDcommand(double cmd){
 }
  
 void PIDgoalReached(){
-  //AX_.setMotorPWM(0,0);
   goalreached = true;
-  Serial.println("Goal reached");
   enablePID = false;
 }
  
 double computeAngle(){
-  //Serial.print("Angle: ");
-  //Serial.println((analogRead(POTPIN)-535)/4.55);
   return (analogRead(POTPIN)-535)/4.55;
 }
  
@@ -378,15 +354,12 @@ void sequence() {
             break;
         case HOME:
             HOMEf();
-            //Serial.println("Home");
             break;
         case STOP:
             STOPf();
-            //Serial.println("Stop");
             break;
         case BACKWARD_03:
             BACKWARD03f();
-            //Serial.println("Backward 0.3");
             break;
         case EMERGENCY_STOP:
             EMERGENCYSTOPf();
@@ -396,28 +369,17 @@ void sequence() {
  
 // State machine functions
 void FORWARD05f() {
-  pid_.setGoal(0.15);
-  //pid_.run();
+  pid_.setGoal(0.23);
  
   // Check if the goal has been reached
   if (goalreached) {
-    if (computeAngle() < 8) {
       goalreached = false;
-      //Serial.println("Je suis dans le if 1");
-
       deplacement = BACKWARD_03; // Set movement to backward
-    }
-    else if (computeAngle() >= 8) {
-      goalreached = false;
-      //Serial.println("Je suis dans le if 2");
-      deplacement = FORWRAD_BOX; // Set movement to forward
-    }
   }
 }
  
 void FORWRAD_BOXf() {
   pid_.setGoal(1.1);
-  //pid_.run();
   if (goalreached) {
       if (computeAngle() <= 5)
       {
@@ -429,13 +391,10 @@ void FORWRAD_BOXf() {
 }
 void HOMEf() {
   pid_.setGoal(0);
-  //pid_.run();
 if (goalreached) {
       if (computeAngle() <= 5)
       {
-        //millis
         goalreached = false;
-        //Voir si reset encoder
         deplacement = STOP;
       }
   }
@@ -457,10 +416,16 @@ void EMERGENCYSTOPf(){
 }
  
 void BACKWARD03f() {
-  pid_.setGoal(0.1);
-  //pid_.run();
+  pid_.setGoal(0.15);
   if (goalreached) {
+    if (computeAngle() > -10) {
+   
     goalreached = false;
     deplacement = FORWARD_05;
+    }
+    if(computeAngle() <= -10){
+      goalreached = false;
+      deplacement = FORWRAD_BOX;
+    }
   }
 }
