@@ -70,9 +70,10 @@ enum deplacement
   BACKWARD_03 = 3,
   HOME = 4,
   STOP = 5,
-  ARRET = 6,
+  STOP = 6,
   STAB_FORWARD = 7,
   STAB_BACKWARD = 8,
+  EMERGENCYSTOP = 9,
 } deplacement;
  
  
@@ -90,12 +91,12 @@ void sequence();
 void FORWARD05f();
 void FORWRAD_BOXf();
 void HOMEf();
-void STOPf();
 void BACKWARD03f();
 void ARRETf();
 void STAB_FORWARDf();
 void STAB_BACKWARDf();
- 
+void EMERGENCYSTOPf();
+
 // Fonctions pour le PID
 double PIDmeasurement();
 void PIDcommand(double cmd);
@@ -146,14 +147,12 @@ void loop() {
   if (!enablePID) {
     pid_.enable();
     enablePID = true;
-    //Serial.println("PID enabled");
   }
- 
-  //Serial.println(computeAngle());
+
   sequence();
-  pid_.run();
+
  
-  /*if(shouldRead_){
+  if(shouldRead_){
     readMsg();
   }
   if(shouldSend_){
@@ -173,9 +172,8 @@ void loop() {
   }
   // mise a jour des chronometres
   timerSendMsg_.update();
-  timerPulse_.update();*/
-  //computeAngle();
-  //run pid
+  timerPulse_.update();
+  
   pid_.run();
 }
  
@@ -217,9 +215,7 @@ void sendMsg(){
   StaticJsonDocument<500> doc;
   // Elements du message
  
-  doc["time"] = millis();
   doc["potVex"] = analogRead(POTPIN);
-  doc["encVex"] = vexEncoder_.getCount();
   doc["goal"] = pid_.getGoal();
   doc["measurements"] = PIDmeasurement();
   doc["voltage"] = AX_.getVoltage();
@@ -227,12 +223,6 @@ void sendMsg(){
   doc["pulsePWM"] = pulsePWM_;
   doc["pulseTime"] = pulseTime_;
   doc["inPulse"] = isInPulse_;
-  doc["accelX"] = imu_.getAccelX();
-  doc["accelY"] = imu_.getAccelY();
-  doc["accelZ"] = imu_.getAccelZ();
-  doc["gyroX"] = imu_.getGyroX();
-  doc["gyroY"] = imu_.getGyroY();
-  doc["gyroZ"] = imu_.getGyroZ();
   doc["isGoal"] = pid_.isAtGoal();
   doc["actualTime"] = pid_.getActualDt();
   doc["position"] = position;
@@ -259,8 +249,8 @@ void readMsg(){
  
   // Si erreur dans le message
   if (error) {
-    Serial.print("deserialize() failed: ");
-    Serial.println(error.c_str());
+    //Serial.print("deserialize() failed: ");
+    //Serial.println(error.c_str());
     return;
   }
  
@@ -314,46 +304,33 @@ void readMsg(){
  
 // Fonctions pour le PID
 double PIDmeasurement(){
- 
+
   last_position = position;
- long pulses = AX_.readEncoder(0);
- 
- //Serial.print("Pulses: ");
- //Serial.println(pulses);
- 
- double  nb_turns = (pulses/(PASPARTOUR) )*0.6;
- 
- //Serial.print("nb_turns: ");
-  //Serial.println(nb_turns);
- 
+  long pulses = AX_.readEncoder(0);
+  double  nb_turns = (pulses/(PASPARTOUR) )*0.6;
   position = nb_turns * WHEELCIRCUM;
-  //Serial.print ("Position: ");
-  //Serial.println(position);
   return position;
+
 }
  
 void PIDcommand(double cmd){
   // To do
   cmd = cmd / MAXPIDOUTPUT;
-  /*if (cmd > 1.0) {
+  if (cmd > 1.0) {
     cmd = 1.0;
   } else if (cmd < -1.0) {
     cmd = -1.0;
-  }*/
+  }
  
   AX_.setMotorPWM(0,cmd/2);
 }
  
 void PIDgoalReached(){
-  //AX_.setMotorPWM(0,0);
   goalreached = true;
-  //Serial.println("Goal reached");
   enablePID = false;
 }
  
 double computeAngle(){
-  //Serial.print("Angle: ");
-  //Serial.println((analogRead(POTPIN)-535)/4.55);
   return (analogRead(POTPIN)-535)/4.55;
 }
  
@@ -376,15 +353,14 @@ void sequence() {
             HOMEf();
             //Serial.println("Home");
             break;
-        case STOP:
-            STOPf();
-            //Serial.println("Stop");
+        case EMERGENCYSTOP:
+            EMERGENCYSTOPf();
             break;
         case BACKWARD_03:
             BACKWARD03f();
             //Serial.println("Backward 0.3");
             break;
-        case ARRET:
+        case STOP:
             ARRETf();
             //Serial.println("Stop");
             break;
@@ -415,12 +391,12 @@ void FORWRAD_BOXf() {
   pid_.setGoal(0.80);
 
   if (goalreached) {
-      if (computeAngle() > 0)
+      if (computeAngle() > 2)
       {
         goalreached = false;
         deplacement = STAB_FORWARD;
       }
-      else if(computeAngle() <=0 )
+      else if(computeAngle() <=-2 )
       {
         goalreached = false;
         deplacement = STAB_BACKWARD;
@@ -438,7 +414,8 @@ void STAB_FORWARDf() {
         }
 
         else{
-          deplacement = ARRET;
+          deplacement = STOP;
+          i = 0;
         } 
       }
 }
@@ -453,18 +430,18 @@ void STAB_BACKWARDf() {
         }
 
         else{
-          deplacement = ARRET;
+          deplacement = STOP;
+          i = 0;
         } 
       }
 }
 
 void ARRETf() {
   AX_.setMotorPWM(0,0);
-  //if(computeAngle() >= -0.5 && computeAngle() <= 0.5){
     goalreached = false;
     digitalWrite(MAGPIN, LOW);
+    delay (1000);
     deplacement = HOME;
- // }
     
 }
 
@@ -473,20 +450,10 @@ void HOMEf() {
 if (goalreached) {
       if (computeAngle() <= 5)
       {
-        //millis
         goalreached = false;
         digitalWrite(MAGPIN, HIGH);
-        //Voir si reset encoders
         deplacement = STOP;
       }
-  }
-}
- 
-void STOPf() {
-  pid_.setGoal(0);
-  if (goalreached) {
-    goalreached = false;
-    deplacement = FORWARD_05;
   }
 }
  
@@ -503,4 +470,11 @@ void BACKWARD03f() {
       deplacement = FORWRAD_BOX;
     }
   }
+}
+
+void EMERGENCYSTOPf(){
+  AX_.setMotorPWM(0,0);
+  pid_.disable();
+  enablePID = true;
+  AX_.resetEncoder(0);
 }
