@@ -21,7 +21,7 @@
 #define RAPPORTVITESSE  0.6            // Rapport de vitesse du moteur
  
 #define kp              100
-#define MAXPIDOUTPUT    5         // Valeur maximale du PID
+#define MAXPIDOUTPUT    1         // Valeur maximale du PID
 #define WHEELCIRCUM     2*3.1416*0.08  // Circonférence des roues
  
 /*---------------------------- variables globales ---------------------------*/
@@ -59,21 +59,22 @@ double last_position;                // variable qui garde la dernière position
 bool goalreached = false;           // variable pour indiquer si l'objectif est atteint
 bool movementComplete = false;     // variable pour indiquer si le mouvement est complet
 bool firstRun = true;              // variable pour indiquer si c'est la première fois que la séquence est appelée
-bool enablePID = true;            // variable pour indiquer si le PID est activé
+bool enablePID = true; 
+int value = 2;           // variable pour indiquer si le PID est activé
  
 // Enumération pour les différentes séquences
 enum deplacement
 {
   START = 0,
   FORWARD_05 = 1,
-  FORWRAD_BOX = 2,
+  FORWARD_PASS = 2,
   BACKWARD_03 = 3,
   HOME = 4,
   STOP = 5,
-  STOP = 6,
   STAB_FORWARD = 7,
   STAB_BACKWARD = 8,
   EMERGENCYSTOP = 9,
+  FORWARD_BOX = 10,
 } deplacement;
  
  
@@ -89,13 +90,14 @@ void readMsg();
 void serialEvent();
 void sequence();
 void FORWARD05f();
-void FORWRAD_BOXf();
+void FORWARD_PASSf();
 void HOMEf();
 void BACKWARD03f();
 void ARRETf();
 void STAB_FORWARDf();
 void STAB_BACKWARDf();
 void EMERGENCYSTOPf();
+void FORWARD_BOXf();
 
 // Fonctions pour le PID
 double PIDmeasurement();
@@ -322,7 +324,7 @@ void PIDcommand(double cmd){
     cmd = -1.0;
   }
  
-  AX_.setMotorPWM(0,cmd/2);
+  AX_.setMotorPWM(0,cmd/value);
 }
  
 void PIDgoalReached(){
@@ -345,8 +347,8 @@ void sequence() {
             FORWARD05f();
             //Serial.println("Forward 0.5");
             break;
-        case FORWRAD_BOX:
-            FORWRAD_BOXf();
+        case FORWARD_PASS:
+            FORWARD_PASSf();
             //Serial.println("Forward 1.2");
             break;
         case HOME:
@@ -372,6 +374,10 @@ void sequence() {
             STAB_BACKWARDf();
             //Serial.println("Stop");
             break;
+        case FORWARD_BOX:
+            FORWARD_BOXf();
+            //Serial.println("Stop");
+            break;
     }
 }
  
@@ -382,30 +388,43 @@ void FORWARD05f() {
   // Check if the goal has been reached
   if (goalreached) {
       goalreached = false;
-      deplacement = BACKWARD_03; // Set movement to backward
+      value = 2;
+      deplacement = BACKWARD_03;// Set movement to backward
    
   }
 }
  
-void FORWRAD_BOXf() {
-  pid_.setGoal(0.80);
-
-  if (goalreached) {
-      if (computeAngle() > 2)
-      {
-        goalreached = false;
-        deplacement = STAB_FORWARD;
-      }
-      else if(computeAngle() <=-2 )
-      {
-        goalreached = false;
-        deplacement = STAB_BACKWARD;
-      }
+void FORWARD_BOXf(){
+  pid_.setGoal(0.85);
+  if (goalreached){
+    if (computeAngle() > 0)
+    {
+      goalreached = false;
+      value = 4;
+      deplacement = STAB_FORWARD;
+    }
+    else if(computeAngle() <=0 )
+    {
+      goalreached = false;
+      value = 4;
+      deplacement = STAB_BACKWARD;
+    }
   }
 }
 
+void FORWARD_PASSf() {
+  pid_.setGoal(0.70);
+
+  if (goalreached) {
+        goalreached = false;
+        value = 5;
+        deplacement = FORWARD_BOX;
+  }
+}
+
+
 void STAB_FORWARDf() {
-  pid_.setGoal(0.85);
+  pid_.setGoal(0.92);
   if (goalreached) {
         if(i <= 4){
         goalreached = 0;
@@ -421,7 +440,7 @@ void STAB_FORWARDf() {
 }
 
 void STAB_BACKWARDf() {
-  pid_.setGoal(0.75);
+  pid_.setGoal(0.78);
   if (goalreached) {
         if(i <= 4){
         goalreached = 0;
@@ -452,22 +471,25 @@ if (goalreached) {
       {
         goalreached = false;
         digitalWrite(MAGPIN, HIGH);
+        value = 2;
         deplacement = STOP;
       }
   }
 }
  
 void BACKWARD03f() {
-  pid_.setGoal(0.15);
+  pid_.setGoal(0.22);
   if (goalreached) {
-    if (computeAngle() > -10) {
+    if (computeAngle() < 14) { 
    
     goalreached = false;
+    value = 2;
     deplacement = FORWARD_05;
     }
-    if(computeAngle() <= -10){
+    if(computeAngle() >= 14){
       goalreached = false;
-      deplacement = FORWRAD_BOX;
+      value = 1;
+      deplacement = FORWARD_PASS;
     }
   }
 }
