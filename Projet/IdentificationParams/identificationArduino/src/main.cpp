@@ -293,13 +293,17 @@ void readMsg(){
     shouldMagOn_ = false;
   }
  
-  parse_msg = doc["seqOn"];
+  parse_msg = doc["sequOn"];
     if(!parse_msg.isNull()){
     shouldStartSeq_ = true;
+    pid_.enable();
+    deplacement = START;
   }
-  parse_msg = doc["seqOff"];
+  parse_msg = doc["sequOff"];
     if(!parse_msg.isNull()){
     shouldStopSeq_ = false;
+    deplacement = EMERGENCYSTOP;
+    sequence();
   }
  
  
