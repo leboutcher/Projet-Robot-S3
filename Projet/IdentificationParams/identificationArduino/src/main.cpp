@@ -62,6 +62,7 @@ bool firstRun = true;              // variable pour indiquer si c'est la premiè
 bool enablePID = true;            // variable pour indiquer si le PID est activé
 int value = 2;
 int last_angle;
+float value_stab = 3;
  
 // Enumération pour les différentes séquences
 enum deplacement
@@ -176,6 +177,8 @@ void loop() {
   // mise a jour des chronometres
   timerSendMsg_.update();
   timerPulse_.update();
+  Serial.print("distance: ");
+  Serial.println(position);
   
   pid_.run();
 }
@@ -346,8 +349,17 @@ void sequence() {
         case START:
             pid_.setGoal(0);
             digitalWrite(MAGPIN, HIGH);
-            delay(5000);
-            deplacement = FORWARD_05;
+            if (goalreached) 
+            {
+              goalreached = false;
+              int previous_millis = millis();
+              while (millis() - previous_millis < 3000) {
+                AX_.setMotorPWM(0,0);
+                digitalWrite(MAGPIN, HIGH);
+                value = 2;
+              }
+              deplacement = FORWARD_05;
+            }
             break;
         case FORWARD_05:
             FORWARD05f();
@@ -400,15 +412,15 @@ void FORWARD05f() {
 }
 
 void BACKWARD03f() {
-  pid_.setGoal(0.18);
+  pid_.setGoal(0.17);
   if (goalreached) {
-    if (computeAngle() < 10) { 
+    if (computeAngle() < 5) { 
    
     goalreached = false;
     value = 2;
     deplacement = FORWARD_05;
     }
-    if(computeAngle() >= 10){
+    if(computeAngle() >= 5){
       goalreached = false;
       value = 1;
       deplacement = FORWARD_PASS;
@@ -427,37 +439,42 @@ void FORWARD_PASSf() {
 }
 
 void FORWARD_BOXf(){
-  pid_.setGoal(0.99);
+  pid_.setGoal(0.95);
   last_angle = computeAngle();
   if (goalreached){
-    if(i>=8){
+    if(i>=15){
       goalreached = false;
       value = 3;
+      long time = millis();
+      while (millis() - time < 2000) 
+      {
+      AX_.setMotorPWM(0,0);
+      }
       deplacement = STOP;
     }
     else if (computeAngle() > 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       deplacement = STAB_FORWARD;
     } 
     else if (computeAngle() > 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       deplacement = STAB_BACKWARD;
     }
 
     else if (computeAngle() < 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       deplacement = STAB_BACKWARD;
     }
     else if(computeAngle() < 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       deplacement = STAB_FORWARD;
     }
   }
@@ -465,19 +482,19 @@ void FORWARD_BOXf(){
 
 
 void STAB_FORWARDf() {
-  pid_.setGoal(1.005);
+  pid_.setGoal(0.98);
   last_angle = computeAngle();
   if (goalreached) {
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     } 
     if (computeAngle() > 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
@@ -485,40 +502,40 @@ void STAB_FORWARDf() {
     if (computeAngle() < 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
     if (computeAngle() < 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     }
-    if (i>=8)
+    if (i>=15)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       deplacement = FORWARD_BOX;
     }
   }
 }
 
 void STAB_BACKWARDf() {
-  pid_.setGoal(0.975);
+  pid_.setGoal(0.93);
   last_angle = computeAngle();
   if (goalreached) {
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     } 
     if (computeAngle() > 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
@@ -526,18 +543,18 @@ void STAB_BACKWARDf() {
     if (computeAngle() < 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = 3;
+      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
     if (computeAngle() < 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = 4;
+      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     }
-    if (i>=8)
+    if (i>=15)
     {
       goalreached = false;
       value = 3;
@@ -547,19 +564,18 @@ void STAB_BACKWARDf() {
 }
 
 void ARRETf() {
-  // long time = millis();
-  // while (millis() - time < 2000) {
-  //   AX_.setMotorPWM(0,0);
-  // }
-    AX_.setMotorPWM(0,0);
-    digitalWrite(MAGPIN, LOW);
-    
+    int previoustime = millis();
+    while (millis() - previoustime < 2000) {
+        AX_.setMotorPWM(0, 0);
+        digitalWrite(MAGPIN, LOW);
+    }
     deplacement = HOME;
     
 }
 
 void HOMEf() {
   pid_.setGoal(0);
+  digitalWrite(MAGPIN, LOW);
 if (goalreached) {
       if (computeAngle() <= 5)
       {
