@@ -62,7 +62,7 @@ bool firstRun = true;              // variable pour indiquer si c'est la premiè
 bool enablePID = true;            // variable pour indiquer si le PID est activé
 int value = 2;
 int last_angle;
-float value_stab = 2 ;
+float value_stab = 3.3 ;
 int erreur = 0;
  
 // Enumération pour les différentes séquences
@@ -428,20 +428,19 @@ void BACKWARD03f() {
     }
     if(computeAngle() >= 5){
       goalreached = false;
-      value = 1;
-      deplacement = FORWARD_BOX; // was FORWARD_PASS 
+      value = 1.3;
+      deplacement = FORWARD_PASS; // was FORWARD_PASS 
     }
   }
 }
 
 void FORWARD_PASSf() {
-
-  // pid_.setGoal(0.65);
-  // if (goalreached) {
-  //       goalreached = false;
-  //       value = 2.7;
-  //       deplacement = FORWARD_BOX;
-  // }
+  pid_.setGoal(0.80);
+  if (goalreached) {
+        goalreached = false;
+        value = 2;
+        deplacement = FORWARD_BOX;
+  }
 }
 
 void FORWARD_BOXf(){
@@ -450,7 +449,7 @@ void FORWARD_BOXf(){
   last_angle = computeAngle();
 
   if (goalreached){
-    if(i>=1){
+    if(i>=2){
       goalreached = false;
       value = value_stab;
       long time = millis();
@@ -490,7 +489,7 @@ void STAB_FORWARDf() {
   pid_.setGoal(1.02 );
   last_angle = computeAngle();
   if (goalreached) {
-    if (i>=1)
+    if (i>=2)
     {
       goalreached = false;
       value = 3;
@@ -532,7 +531,7 @@ void STAB_BACKWARDf() {
   pid_.setGoal(0.98);
   last_angle = computeAngle();
   if (goalreached) {
-    if (i>=1)
+    if (i>=2)
     {
       goalreached = false;
       value = 3;
