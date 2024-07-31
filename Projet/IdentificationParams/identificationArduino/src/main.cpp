@@ -78,6 +78,7 @@ enum deplacement
   STAB_BACKWARD = 8,
   EMERGENCYSTOP = 9,
   FORWARD_BOX = 10,
+  ENCODER = 11,
 } deplacement;
  
  
@@ -101,6 +102,7 @@ void STAB_FORWARDf();
 void STAB_BACKWARDf();
 void EMERGENCYSTOPf();
 void FORWARD_BOXf();
+void ENCODERf();
 
 // Fonctions pour le PID
 double PIDmeasurement();
@@ -348,7 +350,6 @@ double computeAngle(){
 void sequence() {
     switch (deplacement) {
         case START:
-            AX_.resetEncoder(0);
             pid_.setGoal(0);
             digitalWrite(MAGPIN, HIGH);
             if (goalreached) 
@@ -397,6 +398,9 @@ void sequence() {
         case FORWARD_BOX:
             FORWARD_BOXf();
             //Serial.println("Stop");
+            break;
+        case ENCODER:
+            ENCODERf();
             break;
     }
 }
@@ -483,7 +487,7 @@ void FORWARD_BOXf(){
 
 void STAB_FORWARDf() {
   value = value_stab;
-  pid_.setGoal(1.01 );
+  pid_.setGoal(1.02 );
   last_angle = computeAngle();
   if (goalreached) {
     if (i>=1)
@@ -525,7 +529,7 @@ void STAB_FORWARDf() {
 }
 
 void STAB_BACKWARDf() {
-  pid_.setGoal(0.99);
+  pid_.setGoal(0.98);
   last_angle = computeAngle();
   if (goalreached) {
     if (i>=1)
@@ -579,7 +583,7 @@ void ARRETf() {
 void HOMEf() {
 
   value = 3;
-  pid_.setGoal(0-0.08);
+  pid_.setGoal(0);
   i=0;
   digitalWrite(MAGPIN, LOW);
 if (goalreached) {
@@ -588,11 +592,19 @@ if (goalreached) {
         goalreached = false;
         digitalWrite(MAGPIN, HIGH);
         value = 2;
-        erreur++;
-        Serial.print("erreur:");
-        Serial.println(erreur);
-        deplacement = START;
+        //AX_.resetEncoder(0);
+        deplacement = ENCODER;
       }
+  }
+}
+
+void ENCODERf(){
+  pid_.setGoal(-0.08);
+  if (goalreached){
+    AX_.resetEncoder(0);
+    // Serial.print("Encodeur values: ");
+    // Serial.println(AX_.readEncoder(0));
+    deplacement = START;
   }
 }
 
