@@ -26,6 +26,7 @@
  
 /*---------------------------- variables globales ---------------------------*/
 int i = 1; 
+int nb_cycle = 1;
 
 ArduinoX AX_;                       // objet arduinoX
 MegaServo servo_;                   // objet servomoteur
@@ -355,8 +356,8 @@ void sequence() {
             if (goalreached) 
             {
               goalreached = false;
-              int previous_millis = millis();
-              while (millis() - previous_millis < 3000) {
+              unsigned long long previous_millis = millis();
+              while (millis() - previous_millis < 1000) {
                 AX_.setMotorPWM(0,0);
                 digitalWrite(MAGPIN, HIGH);
                 value = 2;
@@ -428,7 +429,7 @@ void BACKWARD03f() {
     }
     if(computeAngle() >= 5){
       goalreached = false;
-      value = 1.3;
+      value = 1.5;
       deplacement = FORWARD_PASS; // was FORWARD_PASS 
     }
   }
@@ -451,7 +452,6 @@ void FORWARD_BOXf(){
   if (goalreached){
     if(i>=2){
       goalreached = false;
-      value = value_stab;
       long time = millis();
       while (millis() - time < 1000) 
       {
@@ -492,20 +492,17 @@ void STAB_FORWARDf() {
     if (i>=2)
     {
       goalreached = false;
-      value = 3;
       deplacement = FORWARD_BOX;
     }
     else if(computeAngle() > 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     } 
     else if (computeAngle() > 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
@@ -513,14 +510,12 @@ void STAB_FORWARDf() {
     else if (computeAngle() < 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
     else if (computeAngle() < 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     }
@@ -530,6 +525,7 @@ void STAB_FORWARDf() {
 void STAB_BACKWARDf() {
   pid_.setGoal(0.98);
   last_angle = computeAngle();
+  value = value_stab;
   if (goalreached) {
     if (i>=2)
     {
@@ -540,14 +536,12 @@ void STAB_BACKWARDf() {
     else if(computeAngle() > 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     } 
     else if (computeAngle() > 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
@@ -555,14 +549,12 @@ void STAB_BACKWARDf() {
     else if (computeAngle() < 0 && computeAngle() > last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_BACKWARD;
     }
     else if (computeAngle() < 0 && computeAngle() < last_angle)
     {
       goalreached = false;
-      value = value_stab;
       i++;
       deplacement = STAB_FORWARD;
     }
@@ -570,7 +562,7 @@ void STAB_BACKWARDf() {
 }
 
 void ARRETf() {
-    int previoustime = millis();
+    unsigned long previoustime = millis();
     while (millis() - previoustime < 1000) {
         AX_.setMotorPWM(0,0);
         digitalWrite(MAGPIN, LOW);
@@ -591,7 +583,6 @@ if (goalreached) {
         goalreached = false;
         digitalWrite(MAGPIN, HIGH);
         value = 2;
-        //AX_.resetEncoder(0);
         deplacement = ENCODER;
       }
   }
